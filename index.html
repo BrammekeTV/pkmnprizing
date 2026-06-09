@@ -10,20 +10,13 @@
 </head>
 <body>
   <main class="app-shell">
-    <section class="hero surface">
+    <header class="page-header">
       <div>
-        <p class="eyebrow">GitHub Pages · Material Design 3</p>
-        <h1>Pokémon prijzentool</h1>
-        <p class="hero-copy">
-          Bereken prijzenschema, kosten, winst en marges voor een toernooi op basis van spelersaantal en inschrijfgeld.
-        </p>
+        <p class="section-label">Pokémon prijzentool</p>
+        <h1>Snel overzicht van prijzen en marge</h1>
       </div>
-      <div class="hero-chip-list">
-        <span class="chip">Top cut automatisch</span>
-        <span class="chip">Hamilton-verdeling</span>
-        <span class="chip">Prize packs gratis</span>
-      </div>
-    </section>
+      <p class="header-note">Alle kerninformatie direct zichtbaar.</p>
+    </header>
 
     <div id="message-banner" class="message-banner hidden" role="alert" aria-live="polite"></div>
 
@@ -67,11 +60,24 @@
           </label>
         </div>
 
-        <div class="supporting-text">
-          <p>Min spelers: <strong>4</strong> · Booster inkoop: <strong>€5,00</strong> · Prize packs: <strong>gratis</strong></p>
-          <p>Deelnameprijs buiten top-cut: <strong>1 booster + 1 prize pack</strong></p>
-          <p>Top-cut: <strong>≤32 spelers → Top 4</strong> · <strong>33–64 spelers → Top 6</strong> · <strong>≥65 spelers → Top 8</strong></p>
-        </div>
+        <dl class="supporting-list">
+          <div>
+            <dt>Min spelers</dt>
+            <dd>4</dd>
+          </div>
+          <div>
+            <dt>Booster inkoop</dt>
+            <dd>€5,00</dd>
+          </div>
+          <div>
+            <dt>Deelnameprijs</dt>
+            <dd>1 booster + 1 prize pack</dd>
+          </div>
+          <div>
+            <dt>Top-cut</dt>
+            <dd>≤32 spelers: Top 4 · 33–64: Top 6 · ≥65: Top 8</dd>
+          </div>
+        </dl>
       </form>
 
       <section class="results-column">
@@ -106,16 +112,6 @@
               <tbody id="top-cut-body"></tbody>
             </table>
           </div>
-        </section>
-
-        <section class="surface details-card">
-          <div class="card-header">
-            <div>
-              <p class="section-label">Tekstweergave</p>
-              <h2>Volledige samenvatting</h2>
-            </div>
-          </div>
-          <pre id="result-text" class="result-text" aria-live="polite"></pre>
         </section>
       </section>
     </section>
