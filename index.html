@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokémon Prijzentool</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="calculator.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main class="app-shell">
+    <section class="hero surface">
+      <div>
+        <p class="eyebrow">GitHub Pages · Material Design 3</p>
+        <h1>Pokémon prijzentool</h1>
+        <p class="hero-copy">
+          Bereken prijzenschema, kosten, winst en marges voor een toernooi op basis van spelersaantal en inschrijfgeld.
+        </p>
+      </div>
+      <div class="hero-chip-list">
+        <span class="chip">Top cut automatisch</span>
+        <span class="chip">Hamilton-verdeling</span>
+        <span class="chip">Prize packs gratis</span>
+      </div>
+    </section>
+
+    <div id="message-banner" class="message-banner hidden" role="alert" aria-live="polite"></div>
+
+    <section class="layout-grid">
+      <form id="calculator-form" class="surface form-card" novalidate>
+        <div class="card-header">
+          <div>
+            <p class="section-label">Invoer</p>
+            <h2>Toernooi-instellingen</h2>
+          </div>
+          <div class="button-row">
+            <button type="submit" class="button filled">Bereken</button>
+            <button type="button" id="reset-button" class="button tonal">Reset</button>
+          </div>
+        </div>
+
+        <div class="field-grid">
+          <label class="field">
+            <span>Aantal spelers</span>
+            <input id="players" name="players" type="number" inputmode="numeric" min="1" step="1" value="20" required>
+          </label>
+
+          <label class="field">
+            <span>Inleggeld (€)</span>
+            <input id="entry-fee" name="entry-fee" type="text" inputmode="decimal" value="15.00" required>
+          </label>
+
+          <label class="field">
+            <span>Doel-marge (%)</span>
+            <input id="target-margin" name="target-margin" type="text" inputmode="decimal" value="30" required>
+          </label>
+
+          <label class="field">
+            <span>Min-marge (%)</span>
+            <input id="min-margin" name="min-margin" type="text" inputmode="decimal" value="30" required>
+          </label>
+
+          <label class="field">
+            <span>Max-marge (%)</span>
+            <input id="max-margin" name="max-margin" type="text" inputmode="decimal" value="40" required>
+          </label>
+        </div>
+
+        <div class="supporting-text">
+          <p>Min spelers: <strong>4</strong> · Booster inkoop: <strong>€5,00</strong> · Prize packs: <strong>gratis</strong></p>
+          <p>Deelnameprijs buiten top-cut: <strong>1 booster + 1 prize pack</strong></p>
+          <p>Top-cut: <strong>≤32 spelers → Top 4</strong> · <strong>33–64 spelers → Top 6</strong> · <strong>≥65 spelers → Top 8</strong></p>
+        </div>
+      </form>
+
+      <section class="results-column">
+        <section class="surface overview-card">
+          <div class="card-header">
+            <div>
+              <p class="section-label">Overzicht</p>
+              <h2>Resultaat</h2>
+            </div>
+          </div>
+          <div id="summary-cards" class="summary-grid" aria-live="polite"></div>
+        </section>
+
+        <section class="surface details-card">
+          <div class="card-header">
+            <div>
+              <p class="section-label">Verdeling</p>
+              <h2>Top-cut prijzen</h2>
+            </div>
+          </div>
+          <div id="warnings" class="warning-list"></div>
+          <div id="prize-breakdown" class="data-grid"></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Plaats</th>
+                  <th>Boosters</th>
+                  <th>Prize packs</th>
+                </tr>
+              </thead>
+              <tbody id="top-cut-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="surface details-card">
+          <div class="card-header">
+            <div>
+              <p class="section-label">Tekstweergave</p>
+              <h2>Volledige samenvatting</h2>
+            </div>
+          </div>
+          <pre id="result-text" class="result-text" aria-live="polite"></pre>
+        </section>
+      </section>
+    </section>
+  </main>
+</body>
+</html>
