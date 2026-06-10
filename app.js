@@ -25,11 +25,13 @@
 
   const form = document.querySelector("#calculator-form");
   const resetButton = document.querySelector("#reset-button");
+  const themeToggle = document.querySelector("#theme-toggle");
   const banner = document.querySelector("#message-banner");
   const summaryCards = document.querySelector("#summary-cards");
   const warnings = document.querySelector("#warnings");
   const prizeBreakdown = document.querySelector("#prize-breakdown");
   const topCutBody = document.querySelector("#top-cut-body");
+  const THEME_STORAGE_KEY = "pkmnprizing-theme";
 
   function parseDecimal(value) {
     return Number.parseFloat(String(value).trim().replace(",", "."));
@@ -65,6 +67,19 @@
     banner.className = "message-banner hidden";
   }
 
+  function renderMetricList(container, items) {
+    container.innerHTML = items
+      .map(
+        ([label, value]) => `
+          <article class="metric-row">
+            <p>${label}</p>
+            <strong>${value}</strong>
+          </article>
+        `
+      )
+      .join("");
+  }
+
   function setSummaryCards(data, playerCount, entryFee, targetMargin) {
     const cards = [
       ["Aantal spelers", String(playerCount)],
@@ -76,17 +91,7 @@
       ["Winst", formatEuro(data.profit)],
       ["Werkelijke marge", formatPercent(data.margin)],
     ];
-
-    summaryCards.innerHTML = cards
-      .map(
-        ([label, value]) => `
-          <article class="summary-card">
-            <p>${label}</p>
-            <strong>${value}</strong>
-          </article>
-        `
-      )
-      .join("");
+    renderMetricList(summaryCards, cards);
   }
 
   function setPrizeBreakdown(data) {
@@ -98,16 +103,7 @@
       ["Prize packs volgens formule", data.base_prize_total],
     ];
 
-    prizeBreakdown.innerHTML = items
-      .map(
-        ([label, value]) => `
-          <div class="data-point">
-            <span>${label}</span>
-            <strong>${value}</strong>
-          </div>
-        `
-      )
-      .join("");
+    renderMetricList(prizeBreakdown, items);
   }
 
   function setTopCutTable(data) {
@@ -224,6 +220,33 @@
     calculateAndRender();
   }
 
+  function updateThemeToggle(theme) {
+    if (theme === "dark") {
+      themeToggle.textContent = "☀️ Licht";
+      themeToggle.setAttribute("aria-label", "Schakel lichte modus");
+      return;
+    }
+
+    themeToggle.textContent = "🌙 Donker";
+    themeToggle.setAttribute("aria-label", "Schakel donkere modus");
+  }
+
+  function applyTheme(theme) {
+    document.body.setAttribute("data-theme", theme);
+    updateThemeToggle(theme);
+  }
+
+  function loadTheme() {
+    const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    if (storedTheme === "dark" || storedTheme === "light") {
+      applyTheme(storedTheme);
+      return;
+    }
+
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    applyTheme(prefersDark ? "dark" : "light");
+  }
+
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     try {
@@ -242,7 +265,15 @@
     }
   });
 
+  themeToggle.addEventListener("click", () => {
+    const activeTheme = document.body.getAttribute("data-theme") === "dark" ? "dark" : "light";
+    const nextTheme = activeTheme === "dark" ? "light" : "dark";
+    applyTheme(nextTheme);
+    localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+  });
+
   try {
+    loadTheme();
     calculateAndRender();
   } catch (error) {
     showBanner(error.message, "error");
