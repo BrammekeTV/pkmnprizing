@@ -10,29 +10,7 @@
 </head>
 <body>
   <main class="app-shell">
-    <header class="top-app-bar surface">
-      <div class="title-group">
-        <p class="section-label">Pokémon prijzentool</p>
-        <h1>Prijzen en marge in één helder overzicht</h1>
-      </div>
-      <button type="button" id="theme-toggle" class="button text" aria-label="Schakel donkere modus">🌙 Donker</button>
-    </header>
-
     <div id="message-banner" class="message-banner hidden" role="alert" aria-live="polite"></div>
-
-    <section class="surface pack-showcase" aria-label="Booster pack visualisatie">
-      <figure class="pack-card">
-        <img src="pps8-boosterwrap.png" alt="Deelnameprijs booster pack">
-      </figure>
-      <figure class="pack-card">
-        <img src="mega-evolution-chaos-rising-booster-wrap-mega-greninja.png" alt="Top-cut prijs booster pack">
-      </figure>
-      <div class="pack-copy">
-        <p class="section-label">Visualisatie</p>
-        <h2>Gebruik deze wraps voor snelle prijscommunicatie</h2>
-        <p>De verdeling hieronder laat direct zien hoeveel packs naar deelname en top-cut gaan.</p>
-      </div>
-    </section>
 
     <section class="layout-grid">
       <form id="calculator-form" class="surface form-card" novalidate>
@@ -44,6 +22,7 @@
           <div class="button-row">
             <button type="submit" class="button filled">Bereken</button>
             <button type="button" id="reset-button" class="button tonal">Reset</button>
+            <button type="button" id="theme-toggle" class="button text" aria-label="Schakel donkere modus">🌙 Donker</button>
           </div>
         </div>
 
@@ -95,16 +74,6 @@
       </form>
 
       <section class="results-column">
-        <section class="surface overview-card">
-          <div class="card-header">
-            <div>
-              <p class="section-label">Overzicht</p>
-              <h2>Resultaat</h2>
-            </div>
-          </div>
-          <div id="summary-cards" class="metric-list" aria-live="polite"></div>
-        </section>
-
         <section class="surface details-card">
           <div class="card-header">
             <div>
@@ -126,6 +95,16 @@
               <tbody id="top-cut-body"></tbody>
             </table>
           </div>
+        </section>
+
+        <section class="surface overview-card">
+          <div class="card-header">
+            <div>
+              <p class="section-label">Overzicht</p>
+              <h2>Resultaat</h2>
+            </div>
+          </div>
+          <div id="summary-cards" class="metric-list" aria-live="polite"></div>
         </section>
       </section>
     </section>
