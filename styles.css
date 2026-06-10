@@ -87,7 +87,6 @@ input {
 
 .app-shell {
   width: calc(100% - 32px);
-  max-width: none;
   margin: 0 auto;
   padding: 16px 0 32px;
   display: grid;
@@ -159,7 +158,6 @@ input {
 }
 
 .form-card,
-.overview-card,
 .details-card {
   padding: 18px;
 }
