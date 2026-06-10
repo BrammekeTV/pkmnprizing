@@ -26,6 +26,13 @@
   --md-sys-shape-corner-extra-large: 28px;
   --md-sys-shape-corner-large: 20px;
   --md-sys-shape-corner-medium: 12px;
+  --focus-ring: rgba(103, 80, 164, 0.35);
+  --warning-error-bg: #f9dedc;
+  --warning-error-border: #de3730;
+  --warning-info-bg: #eaddff;
+  --warning-warning-bg: #ffd8e4;
+  --button-hover-overlay: rgba(0, 0, 0, 0.06);
+  --pack-aspect-ratio: 0.72;
 }
 
 body[data-theme="dark"] {
@@ -53,6 +60,12 @@ body[data-theme="dark"] {
   --md-sys-color-shadow: rgba(0, 0, 0, 0.45);
   --md-elevation-1: 0 1px 3px rgba(0, 0, 0, 0.45);
   --md-elevation-2: 0 3px 10px rgba(0, 0, 0, 0.5);
+  --focus-ring: rgba(207, 188, 255, 0.45);
+  --warning-error-bg: #5a1a17;
+  --warning-error-border: #f2b8b5;
+  --warning-info-bg: #4f378b;
+  --warning-warning-bg: #633b48;
+  --button-hover-overlay: rgba(255, 255, 255, 0.12);
 }
 
 * {
@@ -144,7 +157,7 @@ input {
 }
 
 .button:hover {
-  background-image: linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08));
+  background-image: linear-gradient(var(--button-hover-overlay), var(--button-hover-overlay));
 }
 
 .pack-showcase {
@@ -167,7 +180,7 @@ input {
 .pack-card img {
   width: 100%;
   display: block;
-  aspect-ratio: 0.72;
+  aspect-ratio: var(--pack-aspect-ratio);
   object-fit: cover;
 }
 
@@ -229,7 +242,7 @@ input {
 
 .field input:focus {
   border-color: var(--md-sys-color-primary);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--md-sys-color-primary) 35%, transparent);
+  box-shadow: 0 0 0 2px var(--focus-ring);
 }
 
 .supporting-list {
@@ -307,18 +320,18 @@ input {
 }
 
 .warning-card.error {
-  background: color-mix(in srgb, var(--md-sys-color-error-container) 88%, transparent);
-  border-color: color-mix(in srgb, var(--md-sys-color-error) 30%, transparent);
+  background: var(--warning-error-bg);
+  border-color: var(--warning-error-border);
   color: var(--md-sys-color-error);
 }
 
 .warning-card.info {
-  background: color-mix(in srgb, var(--md-sys-color-primary-container) 85%, transparent);
+  background: var(--warning-info-bg);
   color: var(--md-sys-color-on-primary-container);
 }
 
 .warning-card.warning {
-  background: color-mix(in srgb, var(--md-sys-color-tertiary-container) 85%, transparent);
+  background: var(--warning-warning-bg);
   color: var(--md-sys-color-on-surface);
 }
 
@@ -360,13 +373,13 @@ tbody tr + tr {
 }
 
 .message-banner.error {
-  background: color-mix(in srgb, var(--md-sys-color-error-container) 86%, transparent);
-  border-color: color-mix(in srgb, var(--md-sys-color-error) 28%, transparent);
+  background: var(--warning-error-bg);
+  border-color: var(--warning-error-border);
   color: var(--md-sys-color-error);
 }
 
 .message-banner.warning {
-  background: color-mix(in srgb, var(--md-sys-color-tertiary-container) 86%, transparent);
+  background: var(--warning-warning-bg);
   color: var(--md-sys-color-on-surface);
 }
 

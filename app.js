@@ -68,16 +68,20 @@
   }
 
   function renderMetricList(container, items) {
-    container.innerHTML = items
-      .map(
-        ([label, value]) => `
-          <article class="metric-row">
-            <p>${label}</p>
-            <strong>${value}</strong>
-          </article>
-        `
-      )
-      .join("");
+    container.textContent = "";
+    for (const [label, value] of items) {
+      const row = document.createElement("article");
+      row.className = "metric-row";
+
+      const labelElement = document.createElement("p");
+      labelElement.textContent = String(label);
+
+      const valueElement = document.createElement("strong");
+      valueElement.textContent = String(value);
+
+      row.append(labelElement, valueElement);
+      container.append(row);
+    }
   }
 
   function setSummaryCards(data, playerCount, entryFee, targetMargin) {
@@ -237,10 +241,14 @@
   }
 
   function loadTheme() {
-    const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-    if (storedTheme === "dark" || storedTheme === "light") {
-      applyTheme(storedTheme);
-      return;
+    try {
+      const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+      if (typeof storedTheme === "string" && (storedTheme === "dark" || storedTheme === "light")) {
+        applyTheme(storedTheme);
+        return;
+      }
+    } catch (error) {
+      // Ignore storage failures and fall back to OS preference.
     }
 
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -266,10 +274,14 @@
   });
 
   themeToggle.addEventListener("click", () => {
-    const activeTheme = document.body.getAttribute("data-theme") === "dark" ? "dark" : "light";
+    const activeTheme = document.body.getAttribute("data-theme") || "light";
     const nextTheme = activeTheme === "dark" ? "light" : "dark";
     applyTheme(nextTheme);
-    localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+    } catch (error) {
+      // Ignore storage failures; theme still applies for current session.
+    }
   });
 
   try {

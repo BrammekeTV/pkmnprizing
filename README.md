@@ -9,5 +9,6 @@ Statische GitHub Pages-versie van de prijzentool voor Pokémon-toernooien.
 - `app.js` — UI-interactie
 - `styles.css` — Material Design 3-geïnspireerde styling
 - `prijzentool_gui.py` — originele Tkinter-versie
+- `pps8-boosterwrap.png` en `mega-evolution-chaos-rising-booster-wrap-mega-greninja.png` — booster-artwork voor de webvisualisatie
 
 Open `index.html` lokaal of schakel GitHub Pages in op de repository-root om de website te publiceren.
