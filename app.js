@@ -84,15 +84,11 @@
     }
   }
 
-  function setSummaryCards(data, playerCount, entryFee, targetMargin) {
+  function setSummaryCards(data, playerCount) {
     const cards = [
       ["Aantal spelers", String(playerCount)],
       ["Top-cut", `Top ${data.top_cut}`],
-      ["Inleggeld", `${formatEuro(entryFee)}/speler`],
-      ["Doel-marge", `${formatWholePercent(targetMargin)} (band ${formatWholePercent(data.min_margin)}–${formatWholePercent(data.max_margin)})`],
       ["Omzet", formatEuro(data.revenue)],
-      ["Kosten", formatEuro(data.cost)],
-      ["Winst", formatEuro(data.profit)],
       ["Werkelijke marge", formatPercent(data.margin)],
     ];
     renderMetricList(summaryCards, cards);
@@ -126,6 +122,19 @@
 
   function setWarnings(data, minMargin, maxMargin, playerCount) {
     const warningMessages = [];
+    if (data.top_cut > 4) {
+      if (data.top_cut === 6) {
+        warningMessages.push({
+          tone: "info",
+          text: `Info: vanaf 33 spelers stijgt de top-cut naar Top 6. Bij ${playerCount} spelers is dit daarom toegepast.`,
+        });
+      } else if (data.top_cut === 8) {
+        warningMessages.push({
+          tone: "info",
+          text: `Info: vanaf 65 spelers stijgt de top-cut naar Top 8. Bij ${playerCount} spelers is dit daarom toegepast.`,
+        });
+      }
+    }
 
     if (data.margin < minMargin) {
       warningMessages.push({
@@ -209,7 +218,7 @@
 
     const data = calculator.computeWithMargin(playerCount, entryFee, targetMargin, minMargin, maxMargin);
 
-    setSummaryCards(data, playerCount, entryFee, targetMargin);
+    setSummaryCards(data, playerCount);
     setPrizeBreakdown(data);
     setTopCutTable(data);
     setWarnings(data, minMargin, maxMargin, playerCount);
