@@ -5,7 +5,6 @@
     return;
   }
 
-  const ordinalLabels = ["1e", "2e", "3e", "4e", "5e", "6e", "7e", "8e"];
   const euroFormatter = new Intl.NumberFormat("nl-NL", {
     style: "currency",
     currency: "EUR",
@@ -30,7 +29,7 @@
   const summaryCards = document.querySelector("#summary-cards");
   const warnings = document.querySelector("#warnings");
   const prizeBreakdown = document.querySelector("#prize-breakdown");
-  const topCutBody = document.querySelector("#top-cut-body");
+  const allPlacesBody = document.querySelector("#all-places-body");
   const THEME_STORAGE_KEY = "pkmnprizing-theme";
 
   function parseDecimal(value) {
@@ -55,6 +54,10 @@
 
   function formatWholePercent(value) {
     return `${wholePercentFormatter.format(value * 100)}%`;
+  }
+
+  function formatRank(rank) {
+    return `${rank}e`;
   }
 
   function showBanner(message, tone = "error") {
@@ -90,6 +93,7 @@
       ["Top-cut", `Top ${data.top_cut}`],
       ["Omzet", formatEuro(data.revenue)],
       ["Werkelijke marge", formatPercent(data.margin)],
+      ["Booster inkoop", formatEuro(data.booster_cost)],
     ];
     renderMetricList(summaryCards, cards);
   }
@@ -106,12 +110,12 @@
     renderMetricList(prizeBreakdown, items);
   }
 
-  function setTopCutTable(data) {
-    topCutBody.innerHTML = data.top_prizes
+  function setAllPlacesTable(data) {
+    allPlacesBody.innerHTML = data.all_prizes
       .map(
         (prize, index) => `
           <tr>
-            <td>${ordinalLabels[index]}</td>
+            <td>${formatRank(index + 1)}</td>
             <td>${prize.boosters}</td>
             <td>${prize.prize_packs}</td>
           </tr>
@@ -122,19 +126,6 @@
 
   function setWarnings(data, minMargin, maxMargin, playerCount) {
     const warningMessages = [];
-    if (data.top_cut > 4) {
-      if (data.top_cut === 6) {
-        warningMessages.push({
-          tone: "info",
-          text: `Info: vanaf 33 spelers stijgt de top-cut naar Top 6. Bij ${playerCount} spelers is dit daarom toegepast.`,
-        });
-      } else if (data.top_cut === 8) {
-        warningMessages.push({
-          tone: "info",
-          text: `Info: vanaf 65 spelers stijgt de top-cut naar Top 8. Bij ${playerCount} spelers is dit daarom toegepast.`,
-        });
-      }
-    }
 
     if (data.margin < minMargin) {
       warningMessages.push({
@@ -169,6 +160,8 @@
   function getInputs() {
     const playersInput = document.querySelector("#players");
     const feeInput = document.querySelector("#entry-fee");
+    const boosterCostInput = document.querySelector("#booster-cost");
+    const topCutInput = document.querySelector("#top-cut");
     const targetMarginInput = document.querySelector("#target-margin");
     const minMarginInput = document.querySelector("#min-margin");
     const maxMarginInput = document.querySelector("#max-margin");
@@ -181,6 +174,19 @@
     const entryFee = parseDecimal(feeInput.value);
     if (!Number.isFinite(entryFee) || entryFee <= 0) {
       throw new Error("Vul een geldig positief bedrag in voor 'Inleggeld'.");
+    }
+
+    const boosterCost = parseDecimal(boosterCostInput.value);
+    if (!Number.isFinite(boosterCost) || boosterCost <= 0) {
+      throw new Error("Vul een geldig positief bedrag in voor 'Booster inkoop'.");
+    }
+
+    const topCut = Number.parseInt(topCutInput.value.trim(), 10);
+    if (!Number.isInteger(topCut) || topCut < 1) {
+      throw new Error("Vul een geldige top-cut in (minimaal 1).");
+    }
+    if (playerCount >= calculator.MIN_PLAYERS && topCut > playerCount) {
+      throw new Error("Top-cut kan niet groter zijn dan het aantal spelers.");
     }
 
     const targetMargin = parseMargin(targetMarginInput, "Doel-marge");
@@ -196,6 +202,8 @@
     return {
       playerCount,
       entryFee,
+      boosterCost,
+      topCut,
       targetMargin,
       minMargin,
       maxMargin,
@@ -205,28 +213,33 @@
   function calculateAndRender() {
     hideBanner();
 
-    const { playerCount, entryFee, targetMargin, minMargin, maxMargin } = getInputs();
+    const { playerCount, entryFee, boosterCost, topCut, targetMargin, minMargin, maxMargin } = getInputs();
 
     if (playerCount < calculator.MIN_PLAYERS) {
       showBanner(`Minimum aantal spelers is ${calculator.MIN_PLAYERS}.`, "warning");
       summaryCards.innerHTML = "";
       warnings.innerHTML = "";
       prizeBreakdown.innerHTML = "";
-      topCutBody.innerHTML = "";
+      allPlacesBody.innerHTML = "";
       return;
     }
 
-    const data = calculator.computeWithMargin(playerCount, entryFee, targetMargin, minMargin, maxMargin);
+    const data = calculator.computeWithMargin(playerCount, entryFee, targetMargin, minMargin, maxMargin, {
+      topCut,
+      boosterCost,
+    });
 
     setSummaryCards(data, playerCount);
     setPrizeBreakdown(data);
-    setTopCutTable(data);
+    setAllPlacesTable(data);
     setWarnings(data, minMargin, maxMargin, playerCount);
   }
 
   function resetForm() {
     document.querySelector("#players").value = String(calculator.MIN_PLAYERS);
     document.querySelector("#entry-fee").value = "15.00";
+    document.querySelector("#booster-cost").value = String(calculator.DEFAULT_BOOSTER_COST_EUR.toFixed(2));
+    document.querySelector("#top-cut").value = String(calculator.getTopCut(calculator.MIN_PLAYERS));
     document.querySelector("#target-margin").value = String(calculator.DEFAULT_TARGET_MARGIN * 100);
     document.querySelector("#min-margin").value = String(calculator.DEFAULT_MIN_MARGIN * 100);
     document.querySelector("#max-margin").value = String(calculator.DEFAULT_MAX_MARGIN * 100);

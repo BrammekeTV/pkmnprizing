@@ -38,6 +38,16 @@
           </label>
 
           <label class="field">
+            <span>Booster inkoop (€)</span>
+            <input id="booster-cost" name="booster-cost" type="text" inputmode="decimal" value="5.00" required>
+          </label>
+
+          <label class="field">
+            <span>Top-cut (plaatsen)</span>
+            <input id="top-cut" name="top-cut" type="number" inputmode="numeric" min="1" step="1" value="4" required>
+          </label>
+
+          <label class="field">
             <span>Doel-marge (%)</span>
             <input id="target-margin" name="target-margin" type="text" inputmode="decimal" value="30" required>
           </label>
@@ -60,7 +70,7 @@
           </div>
           <div>
             <dt>Booster inkoop</dt>
-            <dd>€5,00</dd>
+            <dd>Standaard €5,00 (aanpasbaar)</dd>
           </div>
           <div>
             <dt>Deelnameprijs</dt>
@@ -68,7 +78,7 @@
           </div>
           <div>
             <dt>Top-cut</dt>
-            <dd>≤32 spelers: Top 4 · 33–64: Top 6 · ≥65: Top 8</dd>
+            <dd>Volledig aanpasbaar (1 t/m aantal spelers)</dd>
           </div>
         </dl>
       </form>
@@ -78,7 +88,7 @@
           <div class="card-header">
             <div>
               <p class="section-label">Verdeling</p>
-              <h2>Top-cut prijzen</h2>
+              <h2>Prijzen per plek</h2>
             </div>
           </div>
           <div id="warnings" class="warning-list"></div>
@@ -92,7 +102,7 @@
                   <th>Prize packs</th>
                 </tr>
               </thead>
-              <tbody id="top-cut-body"></tbody>
+              <tbody id="all-places-body"></tbody>
             </table>
           </div>
         </section>

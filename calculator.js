@@ -1,6 +1,6 @@
 (() => {
   const MIN_PLAYERS = 4;
-  const BOOSTER_COST_EUR = 5.0;
+  const DEFAULT_BOOSTER_COST_EUR = 5.0;
   const PRIZE_PACK_COST_EUR = 0.0;
   const PARTICIPATION_BOOSTERS = 1;
   const PARTICIPATION_PRIZE_PACKS = 1;
@@ -28,6 +28,13 @@
       return 6;
     }
     return 8;
+  }
+
+  function buildRankWeights(topCut) {
+    if (BOOSTER_WEIGHTS[topCut]) {
+      return BOOSTER_WEIGHTS[topCut];
+    }
+    return Array.from({ length: topCut }, (_, index) => topCut - index);
   }
 
   function apportion(total, weights) {
@@ -61,14 +68,22 @@
     return Math.max(0, Math.round(1.5 * playerCount));
   }
 
-  function computeWithMargin(playerCount, entryFee, targetMargin, minMargin, maxMargin) {
-    const topCut = getTopCut(playerCount);
+  function computeWithMargin(playerCount, entryFee, targetMargin, minMargin, maxMargin, options = {}) {
+    const topCutRaw = options.topCut ?? getTopCut(playerCount);
+    const topCut = Number.parseInt(topCutRaw, 10);
+    const safeTopCut = Number.isInteger(topCut) ? topCut : getTopCut(playerCount);
+    const boundedTopCut = Math.max(1, Math.min(playerCount, safeTopCut));
+    const boosterCostRaw = options.boosterCost ?? DEFAULT_BOOSTER_COST_EUR;
+    const parsedBoosterCost = Number(boosterCostRaw);
+    const boosterCost = Number.isFinite(parsedBoosterCost) && parsedBoosterCost > 0
+      ? parsedBoosterCost
+      : DEFAULT_BOOSTER_COST_EUR;
     const revenue = playerCount * entryFee;
 
     const maxCostTarget = revenue * (1.0 - targetMargin);
-    const maxBoostersTarget = Math.floor(maxCostTarget / BOOSTER_COST_EUR);
+    const maxBoostersTarget = boosterCost > 0 ? Math.floor(maxCostTarget / boosterCost) : 0;
 
-    const nonTopPlayers = Math.max(0, playerCount - topCut);
+    const nonTopPlayers = Math.max(0, playerCount - boundedTopCut);
 
     const participationBoostersTotal = nonTopPlayers * PARTICIPATION_BOOSTERS;
     const participationPrizeTotal = nonTopPlayers * PARTICIPATION_PRIZE_PACKS;
@@ -78,18 +93,31 @@
     const basePrizeTotal = prizePacksTotal(playerCount);
     const topPrizeTotal = Math.max(0, basePrizeTotal - participationPrizeTotal);
 
-    const topBoostersSplit = apportion(topBoostersTotal, BOOSTER_WEIGHTS[topCut]);
-    const topPrizeSplit = apportion(topPrizeTotal, PRIZE_WEIGHTS[topCut]);
+    const topBoostersSplit = apportion(topBoostersTotal, buildRankWeights(boundedTopCut));
+    const topPrizeSplit = apportion(topPrizeTotal, PRIZE_WEIGHTS[boundedTopCut] ?? buildRankWeights(boundedTopCut));
 
     const topPrizes = topBoostersSplit.map((boosters, index) => ({
       boosters,
       prize_packs: topPrizeSplit[index],
     }));
 
+    const allPrizes = Array.from({ length: playerCount }, (_, index) => {
+      if (index < boundedTopCut) {
+        return {
+          boosters: topBoostersSplit[index],
+          prize_packs: topPrizeSplit[index],
+        };
+      }
+      return {
+        boosters: PARTICIPATION_BOOSTERS,
+        prize_packs: PARTICIPATION_PRIZE_PACKS,
+      };
+    });
+
     const totalBoostersOut = participationBoostersTotal + topBoostersTotal;
     const totalPrizeOut = participationPrizeTotal + topPrizeTotal;
 
-    const cost = totalBoostersOut * BOOSTER_COST_EUR;
+    const cost = totalBoostersOut * boosterCost;
     const profit = revenue - cost;
     const margin = revenue > 0 ? profit / revenue : 0.0;
 
@@ -100,7 +128,8 @@
       margin,
       min_margin: minMargin,
       max_margin: maxMargin,
-      top_cut: topCut,
+      top_cut: boundedTopCut,
+      booster_cost: boosterCost,
       non_top_players: nonTopPlayers,
       participation_total: {
         boosters: participationBoostersTotal,
@@ -111,6 +140,7 @@
         prize_packs: topPrizeTotal,
       },
       top_prizes: topPrizes,
+      all_prizes: allPrizes,
       total_out: {
         boosters: totalBoostersOut,
         prize_packs: totalPrizeOut,
@@ -121,7 +151,7 @@
 
   const api = {
     MIN_PLAYERS,
-    BOOSTER_COST_EUR,
+    DEFAULT_BOOSTER_COST_EUR,
     PRIZE_PACK_COST_EUR,
     PARTICIPATION_BOOSTERS,
     PARTICIPATION_PRIZE_PACKS,
