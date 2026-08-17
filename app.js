@@ -185,6 +185,9 @@
     if (!Number.isInteger(topCut) || topCut < 1) {
       throw new Error("Vul een geldige top-cut in (minimaal 1).");
     }
+    if (playerCount >= calculator.MIN_PLAYERS && topCut > playerCount) {
+      throw new Error("Top-cut kan niet groter zijn dan het aantal spelers.");
+    }
 
     const targetMargin = parseMargin(targetMarginInput, "Doel-marge");
     const minMargin = parseMargin(minMarginInput, "Min-marge");
@@ -219,10 +222,6 @@
       prizeBreakdown.innerHTML = "";
       allPlacesBody.innerHTML = "";
       return;
-    }
-
-    if (topCut > playerCount) {
-      throw new Error("Top-cut kan niet groter zijn dan het aantal spelers.");
     }
 
     const data = calculator.computeWithMargin(playerCount, entryFee, targetMargin, minMargin, maxMargin, {
