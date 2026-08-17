@@ -20,10 +20,6 @@
     8: [15, 11, 8, 6, 5, 5, 4, 4],
   };
 
-  function getDefaultTopCut(playerCount) {
-    return getTopCut(playerCount);
-  }
-
   function getTopCut(playerCount) {
     if (playerCount <= 32) {
       return 4;
@@ -164,7 +160,6 @@
     DEFAULT_MAX_MARGIN,
     BOOSTER_WEIGHTS,
     PRIZE_WEIGHTS,
-    getDefaultTopCut,
     getTopCut,
     apportion,
     prizePacksTotal,

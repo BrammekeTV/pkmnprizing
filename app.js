@@ -240,7 +240,7 @@
     document.querySelector("#players").value = String(calculator.MIN_PLAYERS);
     document.querySelector("#entry-fee").value = "15.00";
     document.querySelector("#booster-cost").value = String(calculator.DEFAULT_BOOSTER_COST_EUR.toFixed(2));
-    document.querySelector("#top-cut").value = String(calculator.getDefaultTopCut(calculator.MIN_PLAYERS));
+    document.querySelector("#top-cut").value = String(calculator.getTopCut(calculator.MIN_PLAYERS));
     document.querySelector("#target-margin").value = String(calculator.DEFAULT_TARGET_MARGIN * 100);
     document.querySelector("#min-margin").value = String(calculator.DEFAULT_MIN_MARGIN * 100);
     document.querySelector("#max-margin").value = String(calculator.DEFAULT_MAX_MARGIN * 100);
