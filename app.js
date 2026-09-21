@@ -26,6 +26,7 @@
   const resetButton = document.querySelector("#reset-button");
   const themeToggle = document.querySelector("#theme-toggle");
   const banner = document.querySelector("#message-banner");
+  const resultsStatus = document.querySelector("#results-status");
   const summaryCards = document.querySelector("#summary-cards");
   const warnings = document.querySelector("#warnings");
   const prizeBreakdown = document.querySelector("#prize-breakdown");
@@ -156,6 +157,10 @@
       .join("");
   }
 
+  function announceResults(data, playerCount) {
+    resultsStatus.textContent = `Berekening bijgewerkt voor ${playerCount} spelers: ${data.total_out.boosters} boosters en ${data.total_out.prize_packs} prize packs totaal, marge ${formatPercent(data.margin)}.`;
+  }
+
   function getInputs() {
     const playersInput = document.querySelector("#players");
     const feeInput = document.querySelector("#entry-fee");
@@ -240,6 +245,7 @@
 
     if (playerCount < calculator.MIN_PLAYERS) {
       showBanner(`Minimum aantal spelers is ${calculator.MIN_PLAYERS}.`, "warning");
+      resultsStatus.textContent = "";
       summaryCards.innerHTML = "";
       warnings.innerHTML = "";
       prizeBreakdown.innerHTML = "";
@@ -258,6 +264,7 @@
     setPrizeBreakdown(data);
     setAllPlacesTable(data);
     setWarnings(data, minMargin, maxMargin, playerCount);
+    announceResults(data, playerCount);
   }
 
   function resetForm() {
@@ -309,6 +316,7 @@
     try {
       calculateAndRender();
     } catch (error) {
+      resultsStatus.textContent = "";
       showBanner(error.message, "error");
     }
   });
@@ -318,6 +326,7 @@
       resetForm();
       hideBanner();
     } catch (error) {
+      resultsStatus.textContent = "";
       showBanner(error.message, "error");
     }
   });
@@ -337,6 +346,7 @@
     loadTheme();
     calculateAndRender();
   } catch (error) {
+    resultsStatus.textContent = "";
     showBanner(error.message, "error");
   }
 })();

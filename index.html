@@ -11,6 +11,7 @@
 <body>
   <main class="app-shell">
     <div id="message-banner" class="message-banner hidden" role="alert" aria-live="polite"></div>
+    <div id="results-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
     <section class="layout-grid">
       <form id="calculator-form" class="surface form-card" novalidate>
@@ -108,14 +109,14 @@
                 <p class="section-label">Pakjes</p>
                 <h3>Totale pakjes</h3>
               </div>
-              <div id="prize-breakdown" class="metric-list compact" aria-live="polite" aria-atomic="true"></div>
+              <div id="prize-breakdown" class="metric-list compact"></div>
             </section>
             <section class="summary-panel">
               <div class="summary-panel-header">
                 <p class="section-label">Resultaat</p>
                 <h3>Overzicht</h3>
               </div>
-              <div id="summary-cards" class="metric-list compact" aria-live="polite" aria-atomic="true"></div>
+              <div id="summary-cards" class="metric-list compact"></div>
             </section>
           </div>
           <div class="table-wrap">
