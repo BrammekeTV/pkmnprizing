@@ -11,6 +11,7 @@
 <body>
   <main class="app-shell">
     <div id="message-banner" class="message-banner hidden" role="alert" aria-live="polite"></div>
+    <div id="results-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
     <section class="layout-grid">
       <form id="calculator-form" class="surface form-card" novalidate>
@@ -53,7 +54,7 @@
           </label>
 
           <label class="field">
-            <span>Deelnameprijzen (prize packs)</span>
+            <span>Deelnameprijzen (prijspakketten)</span>
             <input id="participation-prize-packs" name="participation-prize-packs" type="number" inputmode="numeric" min="0" step="1" value="1" required>
           </label>
 
@@ -102,29 +103,34 @@
             </div>
           </div>
           <div id="warnings" class="warning-list"></div>
-          <div id="prize-breakdown" class="metric-list"></div>
+          <div class="summary-strip">
+            <section class="summary-panel" aria-labelledby="prize-breakdown-heading">
+              <div class="summary-panel-header">
+                <p class="section-label">Pakjes</p>
+                <h3 id="prize-breakdown-heading">Totale pakjes</h3>
+              </div>
+              <div id="prize-breakdown" class="metric-list compact"></div>
+            </section>
+            <section class="summary-panel" aria-labelledby="summary-cards-heading">
+              <div class="summary-panel-header">
+                <p class="section-label">Resultaat</p>
+                <h3 id="summary-cards-heading">Overzicht</h3>
+              </div>
+              <div id="summary-cards" class="metric-list compact"></div>
+            </section>
+          </div>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
                   <th>Plaats</th>
                   <th>Boosters</th>
-                  <th>Prize packs</th>
+                  <th>Prijspakketten</th>
                 </tr>
               </thead>
               <tbody id="all-places-body"></tbody>
             </table>
           </div>
-        </section>
-
-        <section class="surface overview-card">
-          <div class="card-header">
-            <div>
-              <p class="section-label">Overzicht</p>
-              <h2>Resultaat</h2>
-            </div>
-          </div>
-          <div id="summary-cards" class="metric-list" aria-live="polite"></div>
         </section>
       </section>
     </section>

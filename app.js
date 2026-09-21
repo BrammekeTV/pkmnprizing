@@ -26,6 +26,7 @@
   const resetButton = document.querySelector("#reset-button");
   const themeToggle = document.querySelector("#theme-toggle");
   const banner = document.querySelector("#message-banner");
+  const resultsStatus = document.querySelector("#results-status");
   const summaryCards = document.querySelector("#summary-cards");
   const warnings = document.querySelector("#warnings");
   const prizeBreakdown = document.querySelector("#prize-breakdown");
@@ -92,19 +93,20 @@
       ["Aantal spelers", String(playerCount)],
       ["Top-cut", `Top ${data.top_cut}`],
       ["Omzet", formatEuro(data.revenue)],
-      ["Werkelijke marge", formatPercent(data.margin)],
       ["Booster inkoop", formatEuro(data.booster_cost)],
+      ["Kosten", formatEuro(data.cost)],
+      ["Resultaat", formatEuro(data.profit)],
+      ["Werkelijke marge", formatPercent(data.margin)],
     ];
     renderMetricList(summaryCards, cards);
   }
 
   function setPrizeBreakdown(data) {
     const items = [
-      ["Spelers buiten top-cut", data.non_top_players],
-      ["Deelnameprijzen totaal", `${data.participation_total.boosters} boosters + ${data.participation_total.prize_packs} prize packs`],
-      ["Voor top-cut beschikbaar", `${data.top_total.boosters} boosters + ${data.top_total.prize_packs} prize packs`],
-      ["Totaal uitgedeeld", `${data.total_out.boosters} boosters + ${data.total_out.prize_packs} prize packs`],
-      ["Prize packs volgens formule", data.base_prize_total],
+      ["Deelnameprijzen totaal", `${data.participation_total.boosters} boosters + ${data.participation_total.prize_packs} prijspakketten`],
+      ["Voor top-cut beschikbaar", `${data.top_total.boosters} boosters + ${data.top_total.prize_packs} prijspakketten`],
+      ["Totaal uitgedeeld", `${data.total_out.boosters} boosters + ${data.total_out.prize_packs} prijspakketten`],
+      ["Prijspakketten volgens formule", data.base_prize_total],
     ];
 
     renderMetricList(prizeBreakdown, items);
@@ -157,6 +159,10 @@
       .join("");
   }
 
+  function announceResults(data, playerCount) {
+    resultsStatus.textContent = `Berekening bijgewerkt voor ${playerCount} spelers: ${data.total_out.boosters} boosters en ${data.total_out.prize_packs} prijspakketten totaal, marge ${formatPercent(data.margin)}.`;
+  }
+
   function getInputs() {
     const playersInput = document.querySelector("#players");
     const feeInput = document.querySelector("#entry-fee");
@@ -198,7 +204,7 @@
 
     const participationPrizePacks = Number.parseInt(participationPrizePacksInput.value.trim(), 10);
     if (!Number.isInteger(participationPrizePacks) || participationPrizePacks < 0) {
-      throw new Error("Vul een geldig aantal deelname-prize packs in (0 of hoger).");
+      throw new Error("Vul een geldig aantal deelname-prijspakketten in (0 of hoger).");
     }
 
     const targetMargin = parseMargin(targetMarginInput, "Doel-marge");
@@ -241,6 +247,7 @@
 
     if (playerCount < calculator.MIN_PLAYERS) {
       showBanner(`Minimum aantal spelers is ${calculator.MIN_PLAYERS}.`, "warning");
+      resultsStatus.textContent = "";
       summaryCards.innerHTML = "";
       warnings.innerHTML = "";
       prizeBreakdown.innerHTML = "";
@@ -259,6 +266,7 @@
     setPrizeBreakdown(data);
     setAllPlacesTable(data);
     setWarnings(data, minMargin, maxMargin, playerCount);
+    announceResults(data, playerCount);
   }
 
   function resetForm() {
@@ -310,6 +318,7 @@
     try {
       calculateAndRender();
     } catch (error) {
+      resultsStatus.textContent = "";
       showBanner(error.message, "error");
     }
   });
@@ -319,6 +328,7 @@
       resetForm();
       hideBanner();
     } catch (error) {
+      resultsStatus.textContent = "";
       showBanner(error.message, "error");
     }
   });
@@ -338,6 +348,7 @@
     loadTheme();
     calculateAndRender();
   } catch (error) {
+    resultsStatus.textContent = "";
     showBanner(error.message, "error");
   }
 })();
