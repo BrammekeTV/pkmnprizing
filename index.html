@@ -102,7 +102,22 @@
             </div>
           </div>
           <div id="warnings" class="warning-list"></div>
-          <div id="prize-breakdown" class="metric-list"></div>
+          <div class="summary-strip">
+            <section class="summary-panel">
+              <div class="summary-panel-header">
+                <p class="section-label">Pakjes</p>
+                <h3>Totale pakjes</h3>
+              </div>
+              <div id="prize-breakdown" class="metric-list compact" aria-live="polite"></div>
+            </section>
+            <section class="summary-panel">
+              <div class="summary-panel-header">
+                <p class="section-label">Resultaat</p>
+                <h3>Overzicht</h3>
+              </div>
+              <div id="summary-cards" class="metric-list compact" aria-live="polite"></div>
+            </section>
+          </div>
           <div class="table-wrap">
             <table>
               <thead>
@@ -115,16 +130,6 @@
               <tbody id="all-places-body"></tbody>
             </table>
           </div>
-        </section>
-
-        <section class="surface overview-card">
-          <div class="card-header">
-            <div>
-              <p class="section-label">Overzicht</p>
-              <h2>Resultaat</h2>
-            </div>
-          </div>
-          <div id="summary-cards" class="metric-list" aria-live="polite"></div>
         </section>
       </section>
     </section>

@@ -89,18 +89,17 @@
 
   function setSummaryCards(data, playerCount) {
     const cards = [
-      ["Aantal spelers", String(playerCount)],
-      ["Top-cut", `Top ${data.top_cut}`],
       ["Omzet", formatEuro(data.revenue)],
+      ["Kosten", formatEuro(data.cost)],
+      ["Resultaat", formatEuro(data.profit)],
       ["Werkelijke marge", formatPercent(data.margin)],
-      ["Booster inkoop", formatEuro(data.booster_cost)],
+      ["Spelers / top-cut", `${playerCount} / top ${data.top_cut}`],
     ];
     renderMetricList(summaryCards, cards);
   }
 
   function setPrizeBreakdown(data) {
     const items = [
-      ["Spelers buiten top-cut", data.non_top_players],
       ["Deelnameprijzen totaal", `${data.participation_total.boosters} boosters + ${data.participation_total.prize_packs} prize packs`],
       ["Voor top-cut beschikbaar", `${data.top_total.boosters} boosters + ${data.top_total.prize_packs} prize packs`],
       ["Totaal uitgedeeld", `${data.total_out.boosters} boosters + ${data.total_out.prize_packs} prize packs`],
