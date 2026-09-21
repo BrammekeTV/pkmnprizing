@@ -90,11 +90,12 @@
 
   function setSummaryCards(data, playerCount) {
     const cards = [
+      ["Aantal spelers", String(playerCount)],
+      ["Top-cut", `Top ${data.top_cut}`],
       ["Omzet", formatEuro(data.revenue)],
       ["Kosten", formatEuro(data.cost)],
       ["Resultaat", formatEuro(data.profit)],
       ["Werkelijke marge", formatPercent(data.margin)],
-      ["Spelers / top-cut", `${playerCount} / top ${data.top_cut}`],
     ];
     renderMetricList(summaryCards, cards);
   }
