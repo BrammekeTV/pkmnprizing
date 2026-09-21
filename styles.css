@@ -88,9 +88,9 @@ input {
 .app-shell {
   width: calc(100% - 32px);
   margin: 0 auto;
-  padding: 16px 0 32px;
+  padding: 10px 0 14px;
   display: grid;
-  gap: 16px;
+  gap: 10px;
 }
 
 .surface {
@@ -124,10 +124,11 @@ input {
 .button {
   border: 1px solid transparent;
   border-radius: 999px;
-  padding: 10px 16px;
+  padding: 8px 12px;
   cursor: pointer;
   font-weight: 600;
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  font-size: 0.9rem;
 }
 
 .button.filled {
@@ -152,18 +153,25 @@ input {
 
 .layout-grid {
   display: grid;
-  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
-  gap: 16px;
+  grid-template-columns: minmax(270px, 320px) minmax(0, 1fr);
+  gap: 10px;
   align-items: start;
+  height: calc(100vh - 42px);
+  overflow: hidden;
 }
 
 .form-card,
 .details-card {
-  padding: 18px;
+  padding: 12px;
+}
+
+.form-card {
+  max-height: 100%;
+  overflow: auto;
 }
 
 .overview-card {
-  padding: 12px;
+  padding: 10px;
 }
 
 .overview-card .card-header {
@@ -171,12 +179,14 @@ input {
 }
 
 .overview-card .metric-row {
-  padding: 8px 10px;
+  padding: 6px 9px;
 }
 
 .results-column {
   display: grid;
-  gap: 16px;
+  gap: 10px;
+  min-height: 0;
+  grid-template-rows: minmax(0, 1fr) auto;
 }
 
 .card-header {
@@ -184,21 +194,22 @@ input {
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .field-grid {
   display: grid;
-  gap: 10px;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .field {
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .field span {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   color: var(--md-sys-color-on-surface-variant);
 }
 
@@ -207,7 +218,7 @@ input {
   border: 1px solid var(--md-sys-color-outline);
   background: var(--md-sys-color-surface-container-low);
   color: var(--md-sys-color-on-surface);
-  padding: 11px 12px;
+  padding: 8px 10px;
   border-radius: 10px;
   outline: none;
 }
@@ -218,7 +229,7 @@ input {
 }
 
 .supporting-list {
-  margin: 14px 0 0;
+  margin: 10px 0 0;
   padding: 0;
   list-style: none;
   border: 1px solid var(--md-sys-color-outline-variant);
@@ -227,7 +238,7 @@ input {
 }
 
 .supporting-list div {
-  padding: 10px 12px;
+  padding: 7px 10px;
   background: var(--md-sys-color-surface-container-low);
   display: grid;
   gap: 2px;
@@ -240,12 +251,12 @@ input {
 .supporting-list dt {
   margin: 0;
   color: var(--md-sys-color-on-surface-variant);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
 }
 
 .supporting-list dd {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 600;
 }
 
@@ -260,7 +271,7 @@ input {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
-  padding: 10px 12px;
+  padding: 8px 10px;
   background: var(--md-sys-color-surface-container-low);
 }
 
@@ -281,14 +292,15 @@ input {
 
 .warning-list {
   display: grid;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 6px;
+  margin-bottom: 8px;
 }
 
 .warning-card {
-  padding: 10px 12px;
+  padding: 7px 10px;
   border-radius: 10px;
   border: 1px solid transparent;
+  font-size: 0.9rem;
 }
 
 .warning-card.error {
@@ -308,10 +320,11 @@ input {
 }
 
 .table-wrap {
-  margin-top: 12px;
-  overflow: hidden;
+  margin-top: 8px;
+  overflow: auto;
   border-radius: var(--md-sys-shape-corner-medium);
   border: 1px solid var(--md-sys-color-outline-variant);
+  max-height: clamp(220px, 56vh, 620px);
 }
 
 table {
@@ -326,7 +339,14 @@ thead {
 th,
 td {
   text-align: left;
-  padding: 10px 12px;
+  padding: 7px 10px;
+  font-size: 0.9rem;
+}
+
+th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 tbody tr {
@@ -362,10 +382,20 @@ tbody tr + tr {
 @media (max-width: 980px) {
   .layout-grid {
     grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
   }
 
   .card-header {
     flex-direction: column;
+  }
+
+  .field-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-wrap {
+    max-height: none;
   }
 }
 
