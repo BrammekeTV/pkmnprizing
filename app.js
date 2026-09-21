@@ -93,6 +93,7 @@
       ["Aantal spelers", String(playerCount)],
       ["Top-cut", `Top ${data.top_cut}`],
       ["Omzet", formatEuro(data.revenue)],
+      ["Booster inkoop", formatEuro(data.booster_cost)],
       ["Kosten", formatEuro(data.cost)],
       ["Resultaat", formatEuro(data.profit)],
       ["Werkelijke marge", formatPercent(data.margin)],
