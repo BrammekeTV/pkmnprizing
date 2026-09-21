@@ -101,10 +101,10 @@
 
   function setPrizeBreakdown(data) {
     const items = [
-      ["Deelnameprijzen totaal", `${data.participation_total.boosters} boosters + ${data.participation_total.prize_packs} prize packs`],
-      ["Voor top-cut beschikbaar", `${data.top_total.boosters} boosters + ${data.top_total.prize_packs} prize packs`],
-      ["Totaal uitgedeeld", `${data.total_out.boosters} boosters + ${data.total_out.prize_packs} prize packs`],
-      ["Prize packs volgens formule", data.base_prize_total],
+      ["Deelnameprijzen totaal", `${data.participation_total.boosters} boosters + ${data.participation_total.prize_packs} prijspakketten`],
+      ["Voor top-cut beschikbaar", `${data.top_total.boosters} boosters + ${data.top_total.prize_packs} prijspakketten`],
+      ["Totaal uitgedeeld", `${data.total_out.boosters} boosters + ${data.total_out.prize_packs} prijspakketten`],
+      ["Prijspakketten volgens formule", data.base_prize_total],
     ];
 
     renderMetricList(prizeBreakdown, items);
@@ -158,7 +158,7 @@
   }
 
   function announceResults(data, playerCount) {
-    resultsStatus.textContent = `Berekening bijgewerkt voor ${playerCount} spelers: ${data.total_out.boosters} boosters en ${data.total_out.prize_packs} prize packs totaal, marge ${formatPercent(data.margin)}.`;
+    resultsStatus.textContent = `Berekening bijgewerkt voor ${playerCount} spelers: ${data.total_out.boosters} boosters en ${data.total_out.prize_packs} prijspakketten totaal, marge ${formatPercent(data.margin)}.`;
   }
 
   function getInputs() {
@@ -202,7 +202,7 @@
 
     const participationPrizePacks = Number.parseInt(participationPrizePacksInput.value.trim(), 10);
     if (!Number.isInteger(participationPrizePacks) || participationPrizePacks < 0) {
-      throw new Error("Vul een geldig aantal deelname-prize packs in (0 of hoger).");
+      throw new Error("Vul een geldig aantal deelname-prijspakketten in (0 of hoger).");
     }
 
     const targetMargin = parseMargin(targetMarginInput, "Doel-marge");
