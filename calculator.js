@@ -2,8 +2,8 @@
   const MIN_PLAYERS = 4;
   const DEFAULT_BOOSTER_COST_EUR = 5.0;
   const PRIZE_PACK_COST_EUR = 0.0;
-  const PARTICIPATION_BOOSTERS = 1;
-  const PARTICIPATION_PRIZE_PACKS = 1;
+  const DEFAULT_PARTICIPATION_BOOSTERS = 1;
+  const DEFAULT_PARTICIPATION_PRIZE_PACKS = 1;
   const DEFAULT_TARGET_MARGIN = 0.3;
   const DEFAULT_MIN_MARGIN = 0.3;
   const DEFAULT_MAX_MARGIN = 0.4;
@@ -78,6 +78,16 @@
     const boosterCost = Number.isFinite(parsedBoosterCost) && parsedBoosterCost > 0
       ? parsedBoosterCost
       : DEFAULT_BOOSTER_COST_EUR;
+    const participationBoostersRaw = options.participationBoosters ?? DEFAULT_PARTICIPATION_BOOSTERS;
+    const parsedParticipationBoosters = Number.parseInt(participationBoostersRaw, 10);
+    const participationBoosters = Number.isInteger(parsedParticipationBoosters) && parsedParticipationBoosters >= 0
+      ? parsedParticipationBoosters
+      : DEFAULT_PARTICIPATION_BOOSTERS;
+    const participationPrizePacksRaw = options.participationPrizePacks ?? DEFAULT_PARTICIPATION_PRIZE_PACKS;
+    const parsedParticipationPrizePacks = Number.parseInt(participationPrizePacksRaw, 10);
+    const participationPrizePacks = Number.isInteger(parsedParticipationPrizePacks) && parsedParticipationPrizePacks >= 0
+      ? parsedParticipationPrizePacks
+      : DEFAULT_PARTICIPATION_PRIZE_PACKS;
     const revenue = playerCount * entryFee;
 
     const maxCostTarget = revenue * (1.0 - targetMargin);
@@ -85,8 +95,8 @@
 
     const nonTopPlayers = Math.max(0, playerCount - boundedTopCut);
 
-    const participationBoostersTotal = nonTopPlayers * PARTICIPATION_BOOSTERS;
-    const participationPrizeTotal = nonTopPlayers * PARTICIPATION_PRIZE_PACKS;
+    const participationBoostersTotal = nonTopPlayers * participationBoosters;
+    const participationPrizeTotal = nonTopPlayers * participationPrizePacks;
 
     const topBoostersTotal = Math.max(0, maxBoostersTarget - participationBoostersTotal);
 
@@ -109,8 +119,8 @@
         };
       }
       return {
-        boosters: PARTICIPATION_BOOSTERS,
-        prize_packs: PARTICIPATION_PRIZE_PACKS,
+        boosters: participationBoosters,
+        prize_packs: participationPrizePacks,
       };
     });
 
@@ -153,8 +163,8 @@
     MIN_PLAYERS,
     DEFAULT_BOOSTER_COST_EUR,
     PRIZE_PACK_COST_EUR,
-    PARTICIPATION_BOOSTERS,
-    PARTICIPATION_PRIZE_PACKS,
+    DEFAULT_PARTICIPATION_BOOSTERS,
+    DEFAULT_PARTICIPATION_PRIZE_PACKS,
     DEFAULT_TARGET_MARGIN,
     DEFAULT_MIN_MARGIN,
     DEFAULT_MAX_MARGIN,
