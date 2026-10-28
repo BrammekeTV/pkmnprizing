@@ -106,7 +106,7 @@
       ["Deelnameprijzen totaal", `${data.participation_total.boosters} boosters + ${data.participation_total.prize_packs} prijspakketten`],
       ["Voor top-cut beschikbaar", `${data.top_total.boosters} boosters + ${data.top_total.prize_packs} prijspakketten`],
       ["Totaal uitgedeeld", `${data.total_out.boosters} boosters + ${data.total_out.prize_packs} prijspakketten`],
-      [`Prijspakketten (${calculator.PRIZE_PACK_MODES[data.prize_pack_mode]})`, data.base_prize_total],
+      ["Prijspakketten per plek", calculator.PRIZE_PACK_MODES[data.prize_pack_mode]],
     ];
 
     renderMetricList(prizeBreakdown, items);
@@ -148,13 +148,6 @@
       });
     }
 
-    if (data.top_total.prize_packs === 0 && playerCount > data.top_cut && data.participation_total.prize_packs >= data.base_prize_total) {
-      warningMessages.push({
-        tone: "warning",
-        text: `LET OP: top ${data.top_cut} krijgt 0 prijspakketten (deelnameprijzen gebruiken alle ${data.base_prize_total} pakketten).`,
-      });
-    }
-
     warnings.innerHTML = warningMessages
       .map(
         ({ tone, text }) => `
@@ -176,7 +169,6 @@
     const boosterCostInput = document.querySelector("#booster-cost");
     const topCutInput = document.querySelector("#top-cut");
     const participationBoostersInput = document.querySelector("#participation-boosters");
-    const participationPrizePacksInput = document.querySelector("#participation-prize-packs");
     const targetMarginInput = document.querySelector("#target-margin");
     const minMarginInput = document.querySelector("#min-margin");
     const maxMarginInput = document.querySelector("#max-margin");
@@ -210,11 +202,6 @@
       throw new Error("Vul een geldig aantal deelnameboosters in (0 of hoger).");
     }
 
-    const participationPrizePacks = Number.parseInt(participationPrizePacksInput.value.trim(), 10);
-    if (!Number.isInteger(participationPrizePacks) || participationPrizePacks < 0) {
-      throw new Error("Vul een geldig aantal deelname-prijspakketten in (0 of hoger).");
-    }
-
     const targetMargin = parseMargin(targetMarginInput, "Doel-marge");
     const minMargin = parseMargin(minMarginInput, "Min-marge");
     const maxMargin = parseMargin(maxMarginInput, "Max-marge");
@@ -237,7 +224,6 @@
       boosterCost,
       topCut,
       participationBoosters,
-      participationPrizePacks,
       targetMargin,
       minMargin,
       maxMargin,
@@ -254,7 +240,6 @@
       boosterCost,
       topCut,
       participationBoosters,
-      participationPrizePacks,
       targetMargin,
       minMargin,
       maxMargin,
@@ -274,7 +259,6 @@
       topCut,
       boosterCost,
       participationBoosters,
-      participationPrizePacks,
       prizePackMode,
     });
 
@@ -291,7 +275,6 @@
     document.querySelector("#booster-cost").value = String(calculator.DEFAULT_BOOSTER_COST_EUR.toFixed(2));
     document.querySelector("#top-cut").value = String(calculator.getTopCut(calculator.MIN_PLAYERS));
     document.querySelector("#participation-boosters").value = String(calculator.DEFAULT_PARTICIPATION_BOOSTERS);
-    document.querySelector("#participation-prize-packs").value = String(calculator.DEFAULT_PARTICIPATION_PRIZE_PACKS);
     document.querySelector("#target-margin").value = String(calculator.DEFAULT_TARGET_MARGIN * 100);
     document.querySelector("#min-margin").value = String(calculator.DEFAULT_MIN_MARGIN * 100);
     document.querySelector("#max-margin").value = String(calculator.DEFAULT_MAX_MARGIN * 100);

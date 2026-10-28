@@ -3,7 +3,6 @@
   const DEFAULT_BOOSTER_COST_EUR = 5.0;
   const PRIZE_PACK_COST_EUR = 0.0;
   const DEFAULT_PARTICIPATION_BOOSTERS = 1;
-  const DEFAULT_PARTICIPATION_PRIZE_PACKS = 1;
   const DEFAULT_TARGET_MARGIN = 0.3;
   const DEFAULT_MIN_MARGIN = 0.3;
   const DEFAULT_MAX_MARGIN = 0.4;
@@ -19,12 +18,6 @@
     4: [14, 8, 7, 7],
     6: [14, 8, 7, 7, 5, 5],
     8: [14, 8, 7, 7, 5, 5, 4, 4],
-  };
-
-  const PRIZE_WEIGHTS = {
-    4: [15, 11, 8, 6],
-    6: [15, 11, 8, 6, 5, 5],
-    8: [15, 11, 8, 6, 5, 5, 4, 4],
   };
 
   function getTopCut(playerCount) {
@@ -71,15 +64,15 @@
     return result;
   }
 
-  function prizePacksTotal(playerCount, mode = DEFAULT_PRIZE_PACK_MODE, totalBoosters = 0) {
+  function prizePacksForBoosters(boosters, mode = DEFAULT_PRIZE_PACK_MODE) {
     switch (mode) {
       case "half_boosters":
-        return Math.max(0, Math.round(totalBoosters / 2));
+        return Math.max(0, Math.ceil(boosters / 2));
       case "equal_boosters":
-        return Math.max(0, totalBoosters);
+        return Math.max(0, boosters);
       case "per_player":
       default:
-        return Math.max(0, playerCount);
+        return 1;
     }
   }
 
@@ -98,11 +91,6 @@
     const participationBoosters = Number.isInteger(parsedParticipationBoosters) && parsedParticipationBoosters >= 0
       ? parsedParticipationBoosters
       : DEFAULT_PARTICIPATION_BOOSTERS;
-    const participationPrizePacksRaw = options.participationPrizePacks ?? DEFAULT_PARTICIPATION_PRIZE_PACKS;
-    const parsedParticipationPrizePacks = Number.parseInt(participationPrizePacksRaw, 10);
-    const participationPrizePacks = Number.isInteger(parsedParticipationPrizePacks) && parsedParticipationPrizePacks >= 0
-      ? parsedParticipationPrizePacks
-      : DEFAULT_PARTICIPATION_PRIZE_PACKS;
     const prizePackMode = Object.hasOwn(PRIZE_PACK_MODES, options.prizePackMode ?? "")
       ? options.prizePackMode
       : DEFAULT_PRIZE_PACK_MODE;
@@ -114,16 +102,14 @@
     const nonTopPlayers = Math.max(0, playerCount - boundedTopCut);
 
     const participationBoostersTotal = nonTopPlayers * participationBoosters;
+    const participationPrizePacks = prizePacksForBoosters(participationBoosters, prizePackMode);
     const participationPrizeTotal = nonTopPlayers * participationPrizePacks;
 
     const topBoostersTotal = Math.max(0, maxBoostersTarget - participationBoostersTotal);
 
-    const boostersOut = participationBoostersTotal + topBoostersTotal;
-    const basePrizeTotal = prizePacksTotal(playerCount, prizePackMode, boostersOut);
-    const topPrizeTotal = Math.max(0, basePrizeTotal - participationPrizeTotal);
-
     const topBoostersSplit = apportion(topBoostersTotal, buildRankWeights(boundedTopCut));
-    const topPrizeSplit = apportion(topPrizeTotal, PRIZE_WEIGHTS[boundedTopCut] ?? buildRankWeights(boundedTopCut));
+    const topPrizeSplit = topBoostersSplit.map((boosters) => prizePacksForBoosters(boosters, prizePackMode));
+    const topPrizeTotal = topPrizeSplit.reduce((sum, value) => sum + value, 0);
 
     const topPrizes = topBoostersSplit.map((boosters, index) => ({
       boosters,
@@ -174,7 +160,6 @@
         boosters: totalBoostersOut,
         prize_packs: totalPrizeOut,
       },
-      base_prize_total: basePrizeTotal,
       prize_pack_mode: prizePackMode,
     };
   }
@@ -184,17 +169,15 @@
     DEFAULT_BOOSTER_COST_EUR,
     PRIZE_PACK_COST_EUR,
     DEFAULT_PARTICIPATION_BOOSTERS,
-    DEFAULT_PARTICIPATION_PRIZE_PACKS,
     DEFAULT_TARGET_MARGIN,
     DEFAULT_MIN_MARGIN,
     DEFAULT_MAX_MARGIN,
     BOOSTER_WEIGHTS,
-    PRIZE_WEIGHTS,
     PRIZE_PACK_MODES,
     DEFAULT_PRIZE_PACK_MODE,
     getTopCut,
     apportion,
-    prizePacksTotal,
+    prizePacksForBoosters,
     computeWithMargin,
   };
 
