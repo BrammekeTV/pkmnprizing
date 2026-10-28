@@ -164,35 +164,48 @@
     };
   }
 
-  // Age divisions, youngest first. A Juniors or Seniors group with
-  // DIVISION_MIN_SIZE players or fewer plays up one division.
+  // Age divisions, youngest first.
   const DIVISIONS = [
     { key: "juniors", label: "Juniors" },
     { key: "seniors", label: "Seniors" },
     { key: "masters", label: "Masters" },
   ];
-  const DIVISION_MIN_SIZE = 4;
+
+  // Play! Pokémon Tournament Rules Handbook (rev. 1 Sept 2026), 5.2.1 Age-Combined Play:
+  // a division with fewer than 6 competitors is combined with another one.
+  const DIVISION_MIN_SIZE = 6;
 
   function groupDivisions(counts) {
-    const groups = [];
-    let carried = { players: 0, from: [] };
-
-    DIVISIONS.forEach((division, index) => {
+    let groups = DIVISIONS.map((division) => {
       const own = Math.max(0, Number.parseInt(counts[division.key] ?? 0, 10) || 0);
-      const players = own + carried.players;
-      const isLast = index === DIVISIONS.length - 1;
+      return { ...division, own, players: own, merged: [] };
+    }).filter((group) => group.own > 0);
 
-      if (!isLast && players <= DIVISION_MIN_SIZE) {
-        const from = own > 0 ? [...carried.from, { key: division.key, label: division.label, players: own }] : carried.from;
-        carried = { players, from };
+    const find = (key) => groups.find((group) => group.key === key);
+    const isSmall = (group) => Boolean(group) && group.players < DIVISION_MIN_SIZE;
+    const merge = (fromKey, toKey) => {
+      const from = find(fromKey);
+      const to = find(toKey);
+      if (!from || !to) {
         return;
       }
+      to.players += from.players;
+      to.merged.push(...from.merged, { key: from.key, label: from.label, players: from.own });
+      groups = groups.filter((group) => group !== from);
+    };
 
-      if (players > 0) {
-        groups.push({ ...division, own, players, merged: carried.from });
-      }
-      carried = { players: 0, from: [] };
-    });
+    // 1. Too few Juniors: combine with Seniors (or Masters when there are no Seniors).
+    if (isSmall(find("juniors"))) {
+      merge("juniors", find("seniors") ? "seniors" : "masters");
+    }
+    // 2. Seniors (including any Juniors) still too few: combine with Masters.
+    if (isSmall(find("seniors"))) {
+      merge("seniors", "masters");
+    }
+    // 3. Only Masters too few: combine with Seniors.
+    if (isSmall(find("masters"))) {
+      merge("masters", "seniors");
+    }
 
     return groups;
   }

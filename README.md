@@ -6,7 +6,7 @@ De website draait op GitHub Pages vanaf de root van `main`. Lokaal gebruiken kan
 
 ## Hoe de berekening werkt
 
-1. **Divisies.** Masters, Seniors en Juniors krijgen elk een eigen prijzenpot. Juniors of Seniors met 4 of minder spelers spelen mee in de divisie erboven (Juniors bij Seniors, Seniors bij Masters). Alle stappen hieronder gelden per divisie.
+1. **Divisies.** Masters, Seniors en Juniors krijgen elk een eigen prijzenpot. Een divisie met minder dan 6 spelers wordt samengevoegd volgens het Play! Pokémon Tournament Rules Handbook (rev. 1 september 2026, §5.2.1 Age-Combined Play): eerst Juniors bij Seniors, daarna (als dat nog te weinig is) bij Masters; Seniors bij Masters; en als alleen Masters te klein is, Masters bij Seniors. Samengevoegde divisies delen één prijzenpot. Alle stappen hieronder gelden per (samengevoegde) divisie.
 2. **Budget.** Omzet is spelers × inleggeld. Met de doel-marge volgt hoeveel je aan boosters mag uitgeven, en dus hoeveel boosters er uitgaan.
 3. **Deelnameprijzen.** Iedere speler buiten de top-cut krijgt het ingestelde aantal boosters.
 4. **Top-cut.** De overige boosters gaan naar de top-cut, verdeeld met vaste gewichten (1e krijgt het meest). Zonder eigen invoer is de top-cut 4 tot en met 32 spelers, 6 tot en met 64 en daarboven 8.
