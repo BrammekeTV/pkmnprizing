@@ -106,7 +106,7 @@
       ["Deelnameprijzen totaal", `${data.participation_total.boosters} boosters + ${data.participation_total.prize_packs} prijspakketten`],
       ["Voor top-cut beschikbaar", `${data.top_total.boosters} boosters + ${data.top_total.prize_packs} prijspakketten`],
       ["Totaal uitgedeeld", `${data.total_out.boosters} boosters + ${data.total_out.prize_packs} prijspakketten`],
-      ["Prijspakketten volgens formule", data.base_prize_total],
+      [`Prijspakketten (${calculator.PRIZE_PACK_MODES[data.prize_pack_mode]})`, data.base_prize_total],
     ];
 
     renderMetricList(prizeBreakdown, items);
@@ -148,6 +148,13 @@
       });
     }
 
+    if (data.top_total.prize_packs === 0 && playerCount > data.top_cut && data.participation_total.prize_packs >= data.base_prize_total) {
+      warningMessages.push({
+        tone: "warning",
+        text: `LET OP: top ${data.top_cut} krijgt 0 prijspakketten (deelnameprijzen gebruiken alle ${data.base_prize_total} pakketten).`,
+      });
+    }
+
     warnings.innerHTML = warningMessages
       .map(
         ({ tone, text }) => `
@@ -173,6 +180,7 @@
     const targetMarginInput = document.querySelector("#target-margin");
     const minMarginInput = document.querySelector("#min-margin");
     const maxMarginInput = document.querySelector("#max-margin");
+    const prizePackModeInput = document.querySelector("#prize-pack-mode");
 
     const playerCount = Number.parseInt(playersInput.value.trim(), 10);
     if (!Number.isInteger(playerCount)) {
@@ -217,7 +225,13 @@
       );
     }
 
+    const prizePackMode = prizePackModeInput.value;
+    if (!Object.hasOwn(calculator.PRIZE_PACK_MODES, prizePackMode)) {
+      throw new Error("Kies een geldige verdeling voor de prijspakketten.");
+    }
+
     return {
+      prizePackMode,
       playerCount,
       entryFee,
       boosterCost,
@@ -234,6 +248,7 @@
     hideBanner();
 
     const {
+      prizePackMode,
       playerCount,
       entryFee,
       boosterCost,
@@ -260,6 +275,7 @@
       boosterCost,
       participationBoosters,
       participationPrizePacks,
+      prizePackMode,
     });
 
     setSummaryCards(data, playerCount);
@@ -279,6 +295,7 @@
     document.querySelector("#target-margin").value = String(calculator.DEFAULT_TARGET_MARGIN * 100);
     document.querySelector("#min-margin").value = String(calculator.DEFAULT_MIN_MARGIN * 100);
     document.querySelector("#max-margin").value = String(calculator.DEFAULT_MAX_MARGIN * 100);
+    document.querySelector("#prize-pack-mode").value = calculator.DEFAULT_PRIZE_PACK_MODE;
     calculateAndRender();
   }
 
@@ -312,6 +329,15 @@
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     applyTheme(prefersDark ? "dark" : "light");
   }
+
+  document.querySelector("#prize-pack-mode").addEventListener("change", () => {
+    try {
+      calculateAndRender();
+    } catch (error) {
+      resultsStatus.textContent = "";
+      showBanner(error.message, "error");
+    }
+  });
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();

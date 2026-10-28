@@ -8,6 +8,13 @@
   const DEFAULT_MIN_MARGIN = 0.3;
   const DEFAULT_MAX_MARGIN = 0.4;
 
+  const PRIZE_PACK_MODES = {
+    per_player: "1 per persoon",
+    half_boosters: "Helft van boosters",
+    equal_boosters: "Gelijk aan boosters",
+  };
+  const DEFAULT_PRIZE_PACK_MODE = "per_player";
+
   const BOOSTER_WEIGHTS = {
     4: [14, 8, 7, 7],
     6: [14, 8, 7, 7, 5, 5],
@@ -64,8 +71,16 @@
     return result;
   }
 
-  function prizePacksTotal(playerCount) {
-    return Math.max(0, Math.round(1.5 * playerCount));
+  function prizePacksTotal(playerCount, mode = DEFAULT_PRIZE_PACK_MODE, totalBoosters = 0) {
+    switch (mode) {
+      case "half_boosters":
+        return Math.max(0, Math.round(totalBoosters / 2));
+      case "equal_boosters":
+        return Math.max(0, totalBoosters);
+      case "per_player":
+      default:
+        return Math.max(0, playerCount);
+    }
   }
 
   function computeWithMargin(playerCount, entryFee, targetMargin, minMargin, maxMargin, options = {}) {
@@ -88,6 +103,9 @@
     const participationPrizePacks = Number.isInteger(parsedParticipationPrizePacks) && parsedParticipationPrizePacks >= 0
       ? parsedParticipationPrizePacks
       : DEFAULT_PARTICIPATION_PRIZE_PACKS;
+    const prizePackMode = Object.hasOwn(PRIZE_PACK_MODES, options.prizePackMode ?? "")
+      ? options.prizePackMode
+      : DEFAULT_PRIZE_PACK_MODE;
     const revenue = playerCount * entryFee;
 
     const maxCostTarget = revenue * (1.0 - targetMargin);
@@ -100,7 +118,8 @@
 
     const topBoostersTotal = Math.max(0, maxBoostersTarget - participationBoostersTotal);
 
-    const basePrizeTotal = prizePacksTotal(playerCount);
+    const boostersOut = participationBoostersTotal + topBoostersTotal;
+    const basePrizeTotal = prizePacksTotal(playerCount, prizePackMode, boostersOut);
     const topPrizeTotal = Math.max(0, basePrizeTotal - participationPrizeTotal);
 
     const topBoostersSplit = apportion(topBoostersTotal, buildRankWeights(boundedTopCut));
@@ -156,6 +175,7 @@
         prize_packs: totalPrizeOut,
       },
       base_prize_total: basePrizeTotal,
+      prize_pack_mode: prizePackMode,
     };
   }
 
@@ -170,6 +190,8 @@
     DEFAULT_MAX_MARGIN,
     BOOSTER_WEIGHTS,
     PRIZE_WEIGHTS,
+    PRIZE_PACK_MODES,
+    DEFAULT_PRIZE_PACK_MODE,
     getTopCut,
     apportion,
     prizePacksTotal,

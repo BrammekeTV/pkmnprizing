@@ -200,7 +200,12 @@ input {
   color: var(--md-sys-color-on-surface-variant);
 }
 
-.field input {
+.field-wide {
+  grid-column: 1 / -1;
+}
+
+.field input,
+.field select {
   width: 100%;
   border: 1px solid var(--md-sys-color-outline);
   background: var(--md-sys-color-surface-container-low);
@@ -210,7 +215,8 @@ input {
   outline: none;
 }
 
-.field input:focus {
+.field input:focus,
+.field select:focus {
   border-color: var(--md-sys-color-primary);
   box-shadow: 0 0 0 2px var(--focus-ring);
 }
