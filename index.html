@@ -4,135 +4,149 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pokémon Prijzentool</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="calculator.js" defer></script>
-  <script src="app.js" defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,400..800&display=swap">
+  <link rel="stylesheet" href="styles.css?v=20261028e">
+  <script src="calculator.js?v=20261028e" defer></script>
+  <script src="app.js?v=20261028e" defer></script>
 </head>
 <body>
-  <main class="app-shell">
-    <div id="message-banner" class="message-banner hidden" role="alert" aria-live="polite"></div>
-    <div id="results-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <div>
+        <h1>Prijzentool</h1>
+        <p>Bereken prijzen en marge voor je Pokémon-toernooi.</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button type="button" id="reset-button" class="button quiet">Standaardwaarden</button>
+      <button type="button" id="theme-toggle" class="button quiet" aria-label="Schakel donkere modus">Donker</button>
+    </div>
+  </header>
 
-    <section class="layout-grid">
-      <form id="calculator-form" class="surface form-card" novalidate>
-        <div class="card-header">
-          <div>
-            <p class="section-label">Invoer</p>
-            <h2>Toernooi-instellingen</h2>
-          </div>
-          <div class="button-row">
-            <button type="submit" class="button filled">Bereken</button>
-            <button type="button" id="reset-button" class="button tonal">Reset</button>
-            <button type="button" id="theme-toggle" class="button text" aria-label="Schakel donkere modus">🌙 Donker</button>
-          </div>
+  <main class="layout">
+    <form id="calculator-form" class="panel settings" novalidate>
+      <fieldset class="group">
+        <legend>Toernooi</legend>
+        <div class="field-grid">
+          <label class="field field-wide">
+            <span class="field-label">Inleggeld per speler</span>
+            <span class="input-affix">
+              <span class="affix" aria-hidden="true">€</span>
+              <input id="entry-fee" name="entry-fee" type="text" inputmode="decimal" value="15.00" required>
+            </span>
+          </label>
         </div>
+        <div class="division-grid" role="group" aria-label="Spelers en top-cut per divisie">
+          <span aria-hidden="true"></span>
+          <span class="col-head" id="head-masters">Masters</span>
+          <span class="col-head" id="head-seniors">Seniors</span>
+          <span class="col-head" id="head-juniors">Juniors</span>
 
+          <span class="row-head" id="head-players">Spelers</span>
+          <input id="players-masters" name="players-masters" type="number" inputmode="numeric" min="0" step="1" value="20" aria-labelledby="head-players head-masters">
+          <input id="players-seniors" name="players-seniors" type="number" inputmode="numeric" min="0" step="1" value="0" aria-labelledby="head-players head-seniors">
+          <input id="players-juniors" name="players-juniors" type="number" inputmode="numeric" min="0" step="1" value="0" aria-labelledby="head-players head-juniors">
+
+          <span class="row-head" id="head-top-cut">Top-cut</span>
+          <input id="top-cut-masters" name="top-cut-masters" type="number" inputmode="numeric" min="1" step="1" placeholder="auto" aria-labelledby="head-top-cut head-masters">
+          <input id="top-cut-seniors" name="top-cut-seniors" type="number" inputmode="numeric" min="1" step="1" placeholder="auto" aria-labelledby="head-top-cut head-seniors">
+          <input id="top-cut-juniors" name="top-cut-juniors" type="number" inputmode="numeric" min="1" step="1" placeholder="auto" aria-labelledby="head-top-cut head-juniors">
+        </div>
+        <p class="hint group-hint">Een divisie met minder dan 6 spelers wordt samengevoegd, zoals in het toernooihandboek (5.2.1): Juniors bij Seniors, Seniors bij Masters, of Masters bij Seniors als alleen Masters te klein is. Een lege top-cut wordt automatisch gekozen op aantal spelers.</p>
+      </fieldset>
+
+      <fieldset class="group">
+        <legend>Prijzen</legend>
         <div class="field-grid">
           <label class="field">
-            <span>Aantal spelers</span>
-            <input id="players" name="players" type="number" inputmode="numeric" min="1" step="1" value="20" required>
+            <span class="field-label">Inkoop per booster</span>
+            <span class="input-affix">
+              <span class="affix" aria-hidden="true">€</span>
+              <input id="booster-cost" name="booster-cost" type="text" inputmode="decimal" value="5.00" required>
+            </span>
+            <span class="hint">Wat jij per booster betaalt</span>
           </label>
-
           <label class="field">
-            <span>Inleggeld (€)</span>
-            <input id="entry-fee" name="entry-fee" type="text" inputmode="decimal" value="15.00" required>
-          </label>
-
-          <label class="field">
-            <span>Booster inkoop (€)</span>
-            <input id="booster-cost" name="booster-cost" type="text" inputmode="decimal" value="5.00" required>
-          </label>
-
-          <label class="field">
-            <span>Top-cut (plaatsen)</span>
-            <input id="top-cut" name="top-cut" type="number" inputmode="numeric" min="1" step="1" value="4" required>
-          </label>
-
-          <label class="field">
-            <span>Deelnameprijzen (boosters)</span>
+            <span class="field-label">Deelnameprijs</span>
             <input id="participation-boosters" name="participation-boosters" type="number" inputmode="numeric" min="0" step="1" value="1" required>
+            <span class="hint">Boosters per speler buiten de top-cut</span>
           </label>
-
-          <label class="field">
-            <span>Deelnameprijzen (prijspakketten)</span>
-            <input id="participation-prize-packs" name="participation-prize-packs" type="number" inputmode="numeric" min="0" step="1" value="1" required>
-          </label>
-
-          <label class="field">
-            <span>Doel-marge (%)</span>
-            <input id="target-margin" name="target-margin" type="text" inputmode="decimal" value="30" required>
-          </label>
-
-          <label class="field">
-            <span>Min-marge (%)</span>
-            <input id="min-margin" name="min-margin" type="text" inputmode="decimal" value="30" required>
-          </label>
-
-          <label class="field">
-            <span>Max-marge (%)</span>
-            <input id="max-margin" name="max-margin" type="text" inputmode="decimal" value="40" required>
+          <label class="field field-wide">
+            <span class="field-label">Prijspakketten per plek</span>
+            <select id="prize-pack-mode" name="prize-pack-mode">
+              <option value="per_player" selected>1 per persoon</option>
+              <option value="half_boosters">Helft van de boosters</option>
+              <option value="equal_boosters">Gelijk aan de boosters</option>
+            </select>
+            <span class="hint" id="prize-pack-hint">Iedere speler krijgt 1 prijspakket</span>
           </label>
         </div>
+      </fieldset>
 
-        <dl class="supporting-list">
-          <div>
-            <dt>Min spelers</dt>
-            <dd>4</dd>
-          </div>
-          <div>
-            <dt>Booster inkoop</dt>
-            <dd>Standaard €5,00 (aanpasbaar)</dd>
-          </div>
-          <div>
-            <dt>Deelnameprijs</dt>
-            <dd>Volledig aanpasbaar</dd>
-          </div>
-          <div>
-            <dt>Top-cut</dt>
-            <dd>Volledig aanpasbaar (1 t/m aantal spelers)</dd>
-          </div>
-        </dl>
-      </form>
+      <fieldset class="group">
+        <legend>Marge</legend>
+        <div class="field-grid three">
+          <label class="field">
+            <span class="field-label">Minimum</span>
+            <span class="input-affix suffix">
+              <input id="min-margin" name="min-margin" type="text" inputmode="decimal" value="30" required>
+              <span class="affix" aria-hidden="true">%</span>
+            </span>
+          </label>
+          <label class="field">
+            <span class="field-label">Doel</span>
+            <span class="input-affix suffix">
+              <input id="target-margin" name="target-margin" type="text" inputmode="decimal" value="30" required>
+              <span class="affix" aria-hidden="true">%</span>
+            </span>
+          </label>
+          <label class="field">
+            <span class="field-label">Maximum</span>
+            <span class="input-affix suffix">
+              <input id="max-margin" name="max-margin" type="text" inputmode="decimal" value="40" required>
+              <span class="affix" aria-hidden="true">%</span>
+            </span>
+          </label>
+        </div>
+        <p class="hint group-hint">Het doel bepaalt hoeveel boosters er uitgaan. Minimum en maximum zijn je grenzen.</p>
+      </fieldset>
+    </form>
 
-      <section class="results-column">
-        <section class="surface details-card">
-          <div class="card-header">
+    <section class="results" aria-label="Resultaat">
+      <div id="message-banner" class="message-banner hidden" role="alert" aria-live="polite"></div>
+      <div id="results-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+      <div id="results-body" class="results-body">
+        <section class="panel outcome" aria-labelledby="outcome-heading">
+          <div class="outcome-main">
             <div>
-              <p class="section-label">Verdeling</p>
-              <h2>Prijzen per plek</h2>
+              <h2 id="outcome-heading" class="panel-title">Winst</h2>
+              <p id="profit-value" class="big-number">–</p>
+            </div>
+            <div class="outcome-margin">
+              <p class="panel-title">Marge</p>
+              <p id="margin-value" class="big-number">–</p>
             </div>
           </div>
-          <div id="warnings" class="warning-list"></div>
-          <div class="summary-strip">
-            <section class="summary-panel" aria-labelledby="prize-breakdown-heading">
-              <div class="summary-panel-header">
-                <p class="section-label">Pakjes</p>
-                <h3 id="prize-breakdown-heading">Totale pakjes</h3>
-              </div>
-              <div id="prize-breakdown" class="metric-list compact"></div>
-            </section>
-            <section class="summary-panel" aria-labelledby="summary-cards-heading">
-              <div class="summary-panel-header">
-                <p class="section-label">Resultaat</p>
-                <h3 id="summary-cards-heading">Overzicht</h3>
-              </div>
-              <div id="summary-cards" class="metric-list compact"></div>
-            </section>
+          <div class="meter" id="margin-meter" aria-hidden="true">
+            <div class="meter-track">
+              <div class="meter-band" id="meter-band"></div>
+              <div class="meter-marker" id="meter-marker"></div>
+            </div>
+            <div class="meter-scale" id="meter-scale"></div>
           </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Plaats</th>
-                  <th>Boosters</th>
-                  <th>Prijspakketten</th>
-                </tr>
-              </thead>
-              <tbody id="all-places-body"></tbody>
-            </table>
-          </div>
+          <p id="margin-status" class="status-line"></p>
+          <p id="division-notes" class="division-notes"></p>
+          <dl id="money-list" class="money-list"></dl>
         </section>
-      </section>
+
+        <div id="warnings" class="warning-list"></div>
+
+        <div id="division-tables" class="division-tables"></div>
+      </div>
     </section>
   </main>
 </body>

@@ -3,21 +3,21 @@
   const DEFAULT_BOOSTER_COST_EUR = 5.0;
   const PRIZE_PACK_COST_EUR = 0.0;
   const DEFAULT_PARTICIPATION_BOOSTERS = 1;
-  const DEFAULT_PARTICIPATION_PRIZE_PACKS = 1;
   const DEFAULT_TARGET_MARGIN = 0.3;
   const DEFAULT_MIN_MARGIN = 0.3;
   const DEFAULT_MAX_MARGIN = 0.4;
+
+  const PRIZE_PACK_MODES = {
+    per_player: "1 per persoon",
+    half_boosters: "Helft van boosters",
+    equal_boosters: "Gelijk aan boosters",
+  };
+  const DEFAULT_PRIZE_PACK_MODE = "per_player";
 
   const BOOSTER_WEIGHTS = {
     4: [14, 8, 7, 7],
     6: [14, 8, 7, 7, 5, 5],
     8: [14, 8, 7, 7, 5, 5, 4, 4],
-  };
-
-  const PRIZE_WEIGHTS = {
-    4: [15, 11, 8, 6],
-    6: [15, 11, 8, 6, 5, 5],
-    8: [15, 11, 8, 6, 5, 5, 4, 4],
   };
 
   function getTopCut(playerCount) {
@@ -64,8 +64,16 @@
     return result;
   }
 
-  function prizePacksTotal(playerCount) {
-    return Math.max(0, Math.round(1.5 * playerCount));
+  function prizePacksForBoosters(boosters, mode = DEFAULT_PRIZE_PACK_MODE) {
+    switch (mode) {
+      case "half_boosters":
+        return Math.max(0, Math.ceil(boosters / 2));
+      case "equal_boosters":
+        return Math.max(0, boosters);
+      case "per_player":
+      default:
+        return 1;
+    }
   }
 
   function computeWithMargin(playerCount, entryFee, targetMargin, minMargin, maxMargin, options = {}) {
@@ -83,11 +91,9 @@
     const participationBoosters = Number.isInteger(parsedParticipationBoosters) && parsedParticipationBoosters >= 0
       ? parsedParticipationBoosters
       : DEFAULT_PARTICIPATION_BOOSTERS;
-    const participationPrizePacksRaw = options.participationPrizePacks ?? DEFAULT_PARTICIPATION_PRIZE_PACKS;
-    const parsedParticipationPrizePacks = Number.parseInt(participationPrizePacksRaw, 10);
-    const participationPrizePacks = Number.isInteger(parsedParticipationPrizePacks) && parsedParticipationPrizePacks >= 0
-      ? parsedParticipationPrizePacks
-      : DEFAULT_PARTICIPATION_PRIZE_PACKS;
+    const prizePackMode = Object.hasOwn(PRIZE_PACK_MODES, options.prizePackMode ?? "")
+      ? options.prizePackMode
+      : DEFAULT_PRIZE_PACK_MODE;
     const revenue = playerCount * entryFee;
 
     const maxCostTarget = revenue * (1.0 - targetMargin);
@@ -96,15 +102,14 @@
     const nonTopPlayers = Math.max(0, playerCount - boundedTopCut);
 
     const participationBoostersTotal = nonTopPlayers * participationBoosters;
+    const participationPrizePacks = prizePacksForBoosters(participationBoosters, prizePackMode);
     const participationPrizeTotal = nonTopPlayers * participationPrizePacks;
 
     const topBoostersTotal = Math.max(0, maxBoostersTarget - participationBoostersTotal);
 
-    const basePrizeTotal = prizePacksTotal(playerCount);
-    const topPrizeTotal = Math.max(0, basePrizeTotal - participationPrizeTotal);
-
     const topBoostersSplit = apportion(topBoostersTotal, buildRankWeights(boundedTopCut));
-    const topPrizeSplit = apportion(topPrizeTotal, PRIZE_WEIGHTS[boundedTopCut] ?? buildRankWeights(boundedTopCut));
+    const topPrizeSplit = topBoostersSplit.map((boosters) => prizePacksForBoosters(boosters, prizePackMode));
+    const topPrizeTotal = topPrizeSplit.reduce((sum, value) => sum + value, 0);
 
     const topPrizes = topBoostersSplit.map((boosters, index) => ({
       boosters,
@@ -155,24 +160,106 @@
         boosters: totalBoostersOut,
         prize_packs: totalPrizeOut,
       },
-      base_prize_total: basePrizeTotal,
+      prize_pack_mode: prizePackMode,
+    };
+  }
+
+  // Age divisions, youngest first.
+  const DIVISIONS = [
+    { key: "juniors", label: "Juniors" },
+    { key: "seniors", label: "Seniors" },
+    { key: "masters", label: "Masters" },
+  ];
+
+  // Play! Pokémon Tournament Rules Handbook (rev. 1 Sept 2026), 5.2.1 Age-Combined Play:
+  // a division with fewer than 6 competitors is combined with another one.
+  const DIVISION_MIN_SIZE = 6;
+
+  function groupDivisions(counts) {
+    let groups = DIVISIONS.map((division) => {
+      const own = Math.max(0, Number.parseInt(counts[division.key] ?? 0, 10) || 0);
+      return { ...division, own, players: own, merged: [] };
+    }).filter((group) => group.own > 0);
+
+    const find = (key) => groups.find((group) => group.key === key);
+    const isSmall = (group) => Boolean(group) && group.players < DIVISION_MIN_SIZE;
+    const merge = (fromKey, toKey) => {
+      const from = find(fromKey);
+      const to = find(toKey);
+      if (!from || !to) {
+        return;
+      }
+      to.players += from.players;
+      to.merged.push(...from.merged, { key: from.key, label: from.label, players: from.own });
+      groups = groups.filter((group) => group !== from);
+    };
+
+    // 1. Too few Juniors: combine with Seniors (or Masters when there are no Seniors).
+    if (isSmall(find("juniors"))) {
+      merge("juniors", find("seniors") ? "seniors" : "masters");
+    }
+    // 2. Seniors (including any Juniors) still too few: combine with Masters.
+    if (isSmall(find("seniors"))) {
+      merge("seniors", "masters");
+    }
+    // 3. Only Masters too few: combine with Seniors.
+    if (isSmall(find("masters"))) {
+      merge("masters", "seniors");
+    }
+
+    return groups;
+  }
+
+  function computeDivisions(counts, entryFee, targetMargin, minMargin, maxMargin, options = {}) {
+    const topCuts = options.topCuts ?? {};
+    const divisions = groupDivisions(counts).map((group) => {
+      const override = Number.parseInt(topCuts[group.key], 10);
+      const topCut = Number.isInteger(override) && override >= 1 ? override : getTopCut(group.players);
+      return {
+        ...group,
+        top_cut_auto: !(Number.isInteger(override) && override >= 1),
+        result: computeWithMargin(group.players, entryFee, targetMargin, minMargin, maxMargin, { ...options, topCut }),
+      };
+    });
+
+    const sum = (pick) => divisions.reduce((total, division) => total + pick(division.result), 0);
+    const revenue = sum((result) => result.revenue);
+    const cost = sum((result) => result.cost);
+    const profit = revenue - cost;
+
+    return {
+      divisions,
+      players: divisions.reduce((total, division) => total + division.players, 0),
+      revenue,
+      cost,
+      profit,
+      margin: revenue > 0 ? profit / revenue : 0,
+      booster_cost: divisions[0]?.result.booster_cost ?? DEFAULT_BOOSTER_COST_EUR,
+      total_out: {
+        boosters: sum((result) => result.total_out.boosters),
+        prize_packs: sum((result) => result.total_out.prize_packs),
+      },
     };
   }
 
   const api = {
     MIN_PLAYERS,
+    DIVISIONS,
+    DIVISION_MIN_SIZE,
+    groupDivisions,
+    computeDivisions,
     DEFAULT_BOOSTER_COST_EUR,
     PRIZE_PACK_COST_EUR,
     DEFAULT_PARTICIPATION_BOOSTERS,
-    DEFAULT_PARTICIPATION_PRIZE_PACKS,
     DEFAULT_TARGET_MARGIN,
     DEFAULT_MIN_MARGIN,
     DEFAULT_MAX_MARGIN,
     BOOSTER_WEIGHTS,
-    PRIZE_WEIGHTS,
+    PRIZE_PACK_MODES,
+    DEFAULT_PRIZE_PACK_MODE,
     getTopCut,
     apportion,
-    prizePacksTotal,
+    prizePacksForBoosters,
     computeWithMargin,
   };
 
