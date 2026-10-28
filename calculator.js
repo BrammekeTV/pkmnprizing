@@ -164,8 +164,77 @@
     };
   }
 
+  // Age divisions, youngest first. A Juniors or Seniors group with
+  // DIVISION_MIN_SIZE players or fewer plays up one division.
+  const DIVISIONS = [
+    { key: "juniors", label: "Juniors" },
+    { key: "seniors", label: "Seniors" },
+    { key: "masters", label: "Masters" },
+  ];
+  const DIVISION_MIN_SIZE = 4;
+
+  function groupDivisions(counts) {
+    const groups = [];
+    let carried = { players: 0, from: [] };
+
+    DIVISIONS.forEach((division, index) => {
+      const own = Math.max(0, Number.parseInt(counts[division.key] ?? 0, 10) || 0);
+      const players = own + carried.players;
+      const isLast = index === DIVISIONS.length - 1;
+
+      if (!isLast && players <= DIVISION_MIN_SIZE) {
+        const from = own > 0 ? [...carried.from, { key: division.key, label: division.label, players: own }] : carried.from;
+        carried = { players, from };
+        return;
+      }
+
+      if (players > 0) {
+        groups.push({ ...division, own, players, merged: carried.from });
+      }
+      carried = { players: 0, from: [] };
+    });
+
+    return groups;
+  }
+
+  function computeDivisions(counts, entryFee, targetMargin, minMargin, maxMargin, options = {}) {
+    const topCuts = options.topCuts ?? {};
+    const divisions = groupDivisions(counts).map((group) => {
+      const override = Number.parseInt(topCuts[group.key], 10);
+      const topCut = Number.isInteger(override) && override >= 1 ? override : getTopCut(group.players);
+      return {
+        ...group,
+        top_cut_auto: !(Number.isInteger(override) && override >= 1),
+        result: computeWithMargin(group.players, entryFee, targetMargin, minMargin, maxMargin, { ...options, topCut }),
+      };
+    });
+
+    const sum = (pick) => divisions.reduce((total, division) => total + pick(division.result), 0);
+    const revenue = sum((result) => result.revenue);
+    const cost = sum((result) => result.cost);
+    const profit = revenue - cost;
+
+    return {
+      divisions,
+      players: divisions.reduce((total, division) => total + division.players, 0),
+      revenue,
+      cost,
+      profit,
+      margin: revenue > 0 ? profit / revenue : 0,
+      booster_cost: divisions[0]?.result.booster_cost ?? DEFAULT_BOOSTER_COST_EUR,
+      total_out: {
+        boosters: sum((result) => result.total_out.boosters),
+        prize_packs: sum((result) => result.total_out.prize_packs),
+      },
+    };
+  }
+
   const api = {
     MIN_PLAYERS,
+    DIVISIONS,
+    DIVISION_MIN_SIZE,
+    groupDivisions,
+    computeDivisions,
     DEFAULT_BOOSTER_COST_EUR,
     PRIZE_PACK_COST_EUR,
     DEFAULT_PARTICIPATION_BOOSTERS,

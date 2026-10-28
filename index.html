@@ -7,9 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,400..800&display=swap">
-  <link rel="stylesheet" href="styles.css?v=20261028b">
-  <script src="calculator.js?v=20261028b" defer></script>
-  <script src="app.js?v=20261028b" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20261028d">
+  <script src="calculator.js?v=20261028d" defer></script>
+  <script src="app.js?v=20261028d" defer></script>
 </head>
 <body>
   <header class="app-header">
@@ -31,24 +31,31 @@
       <fieldset class="group">
         <legend>Toernooi</legend>
         <div class="field-grid">
-          <label class="field">
-            <span class="field-label">Aantal spelers</span>
-            <input id="players" name="players" type="number" inputmode="numeric" min="1" step="1" value="20" required>
-            <span class="hint">Minimaal 4</span>
-          </label>
-          <label class="field">
+          <label class="field field-wide">
             <span class="field-label">Inleggeld per speler</span>
             <span class="input-affix">
               <span class="affix" aria-hidden="true">€</span>
               <input id="entry-fee" name="entry-fee" type="text" inputmode="decimal" value="15.00" required>
             </span>
           </label>
-          <label class="field field-wide">
-            <span class="field-label">Top-cut</span>
-            <input id="top-cut" name="top-cut" type="number" inputmode="numeric" min="1" step="1" value="4" required>
-            <span class="hint">Aantal plekken dat extra prijzen krijgt</span>
-          </label>
         </div>
+        <div class="division-grid" role="group" aria-label="Spelers en top-cut per divisie">
+          <span aria-hidden="true"></span>
+          <span class="col-head" id="head-masters">Masters</span>
+          <span class="col-head" id="head-seniors">Seniors</span>
+          <span class="col-head" id="head-juniors">Juniors</span>
+
+          <span class="row-head" id="head-players">Spelers</span>
+          <input id="players-masters" name="players-masters" type="number" inputmode="numeric" min="0" step="1" value="20" aria-labelledby="head-players head-masters">
+          <input id="players-seniors" name="players-seniors" type="number" inputmode="numeric" min="0" step="1" value="0" aria-labelledby="head-players head-seniors">
+          <input id="players-juniors" name="players-juniors" type="number" inputmode="numeric" min="0" step="1" value="0" aria-labelledby="head-players head-juniors">
+
+          <span class="row-head" id="head-top-cut">Top-cut</span>
+          <input id="top-cut-masters" name="top-cut-masters" type="number" inputmode="numeric" min="1" step="1" placeholder="auto" aria-labelledby="head-top-cut head-masters">
+          <input id="top-cut-seniors" name="top-cut-seniors" type="number" inputmode="numeric" min="1" step="1" placeholder="auto" aria-labelledby="head-top-cut head-seniors">
+          <input id="top-cut-juniors" name="top-cut-juniors" type="number" inputmode="numeric" min="1" step="1" placeholder="auto" aria-labelledby="head-top-cut head-juniors">
+        </div>
+        <p class="hint group-hint">Juniors of Seniors met 4 of minder spelers spelen mee in de divisie erboven. Een lege top-cut wordt automatisch gekozen op aantal spelers.</p>
       </fieldset>
 
       <fieldset class="group">
@@ -132,27 +139,13 @@
             <div class="meter-scale" id="meter-scale"></div>
           </div>
           <p id="margin-status" class="status-line"></p>
+          <p id="division-notes" class="division-notes"></p>
           <dl id="money-list" class="money-list"></dl>
         </section>
 
         <div id="warnings" class="warning-list"></div>
 
-        <section class="panel" aria-labelledby="handout-heading">
-          <div class="panel-head">
-            <h2 id="handout-heading" class="panel-title">Uitdelen</h2>
-            <p id="handout-totals" class="panel-meta"></p>
-          </div>
-          <table class="prize-table">
-            <thead>
-              <tr>
-                <th scope="col">Plaats</th>
-                <th scope="col" class="num">Boosters</th>
-                <th scope="col" class="num">Prijspakketten</th>
-              </tr>
-            </thead>
-            <tbody id="all-places-body"></tbody>
-          </table>
-        </section>
+        <div id="division-tables" class="division-tables"></div>
       </div>
     </section>
   </main>

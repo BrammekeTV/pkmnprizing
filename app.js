@@ -40,7 +40,7 @@
   const resultsBody = $("#results-body");
   const outcome = $(".outcome");
   const warnings = $("#warnings");
-  const allPlacesBody = $("#all-places-body");
+  const divisionTables = $("#division-tables");
 
   let hasRendered = false;
 
@@ -154,8 +154,13 @@
     $("#margin-status").textContent = status.text;
     renderMeter(data.margin, inputs.minMargin, inputs.maxMargin);
 
+    const notes = data.divisions.flatMap((division) =>
+      division.merged.map((from) => `${from.label} (${plural(from.players, "speler", "spelers")}) spelen mee bij ${division.label}.`)
+    );
+    $("#division-notes").textContent = notes.join(" ");
+
     const money = [
-      ["Omzet", formatEuro(data.revenue), `${inputs.playerCount} × ${formatEuro(inputs.entryFee)}`],
+      ["Omzet", formatEuro(data.revenue), `${data.players} × ${formatEuro(inputs.entryFee)}`],
       ["Kosten", formatEuro(data.cost), `${data.total_out.boosters} × ${formatEuro(data.booster_cost)}`],
       ["Nodig", plural(data.total_out.boosters, "booster", "boosters"), `en ${plural(data.total_out.prize_packs, "prijspakket", "prijspakketten")}`],
     ];
@@ -170,12 +175,11 @@
       .join("");
   }
 
-  function renderTable(data, playerCount) {
-    const topCut = data.top_cut;
-    const rows = [];
+  function tableRows(result, playerCount) {
+    const topCut = result.top_cut;
+    const rows = [`<tr class="group-row"><th colspan="3" scope="colgroup">Top ${topCut}</th></tr>`];
 
-    rows.push(`<tr class="group-row"><th colspan="3" scope="colgroup">Top ${topCut}</th></tr>`);
-    data.top_prizes.forEach((prize, index) => {
+    result.top_prizes.forEach((prize, index) => {
       rows.push(`
         <tr class="top${index === 0 ? " first" : ""}">
           <td>${index + 1}e</td>
@@ -185,66 +189,148 @@
       `);
     });
 
-    if (data.non_top_players > 0) {
+    if (result.non_top_players > 0) {
       const first = topCut + 1;
       const label = first === playerCount ? `${first}e` : `${first}e t/m ${playerCount}e`;
-      const participant = data.all_prizes[topCut];
+      const participant = result.all_prizes[topCut];
       rows.push(`<tr class="group-row"><th colspan="3" scope="colgroup">Deelname</th></tr>`);
       rows.push(`
         <tr>
-          <td>${label}<span class="sub">${plural(data.non_top_players, "speler", "spelers")}, ieder</span></td>
+          <td>${label}<span class="sub">${plural(result.non_top_players, "speler", "spelers")}, ieder</span></td>
           <td class="num">${participant.boosters}</td>
           <td class="num">${participant.prize_packs}</td>
         </tr>
       `);
     }
 
-    allPlacesBody.innerHTML = rows.join("");
-    $("#handout-totals").textContent =
-      `${plural(data.total_out.boosters, "booster", "boosters")} en ${plural(data.total_out.prize_packs, "prijspakket", "prijspakketten")} totaal`;
+    return rows.join("");
   }
 
-  function renderWarnings(data, playerCount) {
-    const messages = [];
-
-    if (data.top_total.boosters === 0 && playerCount > data.top_cut) {
-      messages.push(`De top ${data.top_cut} krijgt geen boosters: het hele budget gaat naar deelnameprijzen. Verlaag de deelnameprijs.`);
-    } else if (data.non_top_players > 0 && data.top_prizes[data.top_cut - 1].boosters < data.all_prizes[data.top_cut].boosters) {
-      messages.push(`Plek ${data.top_cut} krijgt minder boosters dan een deelnemer buiten de top-cut.`);
-    }
-
-    warnings.innerHTML = messages
-      .map((text) => `<div class="warning-card warning">${escapeHtml(text)}</div>`)
+  function renderTables(data) {
+    const ordered = [...data.divisions].reverse();
+    divisionTables.innerHTML = ordered
+      .map((division) => {
+        const result = division.result;
+        const mergedText = division.merged.length
+          ? `, waarvan ${division.merged.map((from) => `${from.players} ${from.label}`).join(" en ")}`
+          : "";
+        const meta = `${plural(division.players, "speler", "spelers")}${mergedText}. ${result.total_out.boosters} boosters en ${result.total_out.prize_packs} prijspakketten.`;
+        const id = `table-${division.key}`;
+        return `
+          <section class="panel" aria-labelledby="${id}">
+            <div class="panel-head">
+              <h2 id="${id}" class="panel-title">${division.label}</h2>
+              <p class="panel-meta">${escapeHtml(meta)}</p>
+            </div>
+            <table class="prize-table">
+              <thead>
+                <tr>
+                  <th scope="col">Plaats</th>
+                  <th scope="col" class="num">Boosters</th>
+                  <th scope="col" class="num">Prijspakketten</th>
+                </tr>
+              </thead>
+              <tbody>${tableRows(result, division.players)}</tbody>
+            </table>
+          </section>
+        `;
+      })
       .join("");
   }
 
+  function renderWarnings(data) {
+    const messages = [];
+    const named = data.divisions.length > 1;
+
+    for (const division of [...data.divisions].reverse()) {
+      const result = division.result;
+      const prefix = named ? `${division.label}: ` : "";
+
+      if (division.players < calculator.MIN_PLAYERS) {
+        messages.push(`${prefix}maar ${plural(division.players, "speler", "spelers")}. Een divisie heeft er minimaal ${calculator.MIN_PLAYERS} nodig.`);
+      }
+      if (result.top_total.boosters === 0 && division.players > result.top_cut) {
+        messages.push(`${prefix}de top ${result.top_cut} krijgt geen boosters: het hele budget gaat naar deelnameprijzen. Verlaag de deelnameprijs.`);
+      } else if (result.non_top_players > 0 && result.top_prizes[result.top_cut - 1].boosters < result.all_prizes[result.top_cut].boosters) {
+        messages.push(`${prefix}plek ${result.top_cut} krijgt minder boosters dan een deelnemer buiten de top-cut.`);
+      }
+    }
+
+    warnings.innerHTML = messages
+      .map((text) => `<div class="warning-card warning">${escapeHtml(text.charAt(0).toUpperCase() + text.slice(1))}</div>`)
+      .join("");
+  }
+
+  function readPlayerCounts() {
+    const counts = {};
+    for (const { key, label } of calculator.DIVISIONS) {
+      const input = $(`#players-${key}`);
+      const raw = input.value.trim();
+      const value = raw === "" ? 0 : Number(raw);
+      if (!Number.isInteger(value) || value < 0) {
+        throw new InputError(`Vul bij ${label} een geheel aantal spelers in (0 of meer).`, input);
+      }
+      counts[key] = value;
+    }
+    return counts;
+  }
+
+  // Disable top-cut fields of divisions that play up, and show the automatic value as placeholder.
+  function updateTopCutFields(counts) {
+    const groups = counts ? calculator.groupDivisions(counts) : [];
+    for (const { key, label } of calculator.DIVISIONS) {
+      const input = $(`#top-cut-${key}`);
+      const group = groups.find((item) => item.key === key);
+      input.disabled = Boolean(counts) && !group;
+      input.placeholder = group ? String(calculator.getTopCut(group.players)) : "–";
+      input.title = input.disabled ? `${label} speelt mee in een hogere divisie` : "";
+    }
+    return groups;
+  }
+
+  function readTopCuts(groups) {
+    const topCuts = {};
+    for (const group of groups) {
+      const input = $(`#top-cut-${group.key}`);
+      const raw = input.value.trim();
+      if (raw === "") {
+        continue;
+      }
+      const value = Number(raw);
+      if (!Number.isInteger(value) || value < 1) {
+        throw new InputError(`Vul bij ${group.label} een top-cut van minimaal 1 in, of laat het veld leeg.`, input);
+      }
+      if (value > group.players) {
+        throw new InputError(`De top-cut van ${group.label} kan niet groter zijn dan het aantal spelers (${group.players}).`, input);
+      }
+      topCuts[group.key] = value;
+    }
+    return topCuts;
+  }
+
   function getInputs() {
-    const playersInput = $("#players");
     const feeInput = $("#entry-fee");
     const boosterCostInput = $("#booster-cost");
-    const topCutInput = $("#top-cut");
     const participationBoostersInput = $("#participation-boosters");
     const prizePackModeInput = $("#prize-pack-mode");
     const targetMarginInput = $("#target-margin");
     const minMarginInput = $("#min-margin");
     const maxMarginInput = $("#max-margin");
 
-    const playerCount = Number.parseInt(playersInput.value.trim(), 10);
-    if (!Number.isInteger(playerCount) || playerCount < 1) {
-      throw new InputError("Vul een geheel aantal spelers in.", playersInput);
+    const counts = readPlayerCounts();
+    const groups = updateTopCutFields(counts);
+    const playerCount = groups.reduce((total, group) => total + group.players, 0);
+    if (playerCount < calculator.MIN_PLAYERS) {
+      throw new InputError(
+        `Een toernooi heeft minimaal ${calculator.MIN_PLAYERS} spelers nodig.`,
+        $("#players-masters")
+      );
     }
+    const topCuts = readTopCuts(groups);
 
     const entryFee = parseDecimal(feeInput.value);
     if (!Number.isFinite(entryFee) || entryFee <= 0) {
       throw new InputError("Vul een inleggeld hoger dan € 0 in.", feeInput);
-    }
-
-    const topCut = Number.parseInt(topCutInput.value.trim(), 10);
-    if (!Number.isInteger(topCut) || topCut < 1) {
-      throw new InputError("Vul een top-cut van minimaal 1 in.", topCutInput);
-    }
-    if (playerCount >= calculator.MIN_PLAYERS && topCut > playerCount) {
-      throw new InputError("De top-cut kan niet groter zijn dan het aantal spelers.", topCutInput);
     }
 
     const boosterCost = parseDecimal(boosterCostInput.value);
@@ -277,10 +363,10 @@
     }
 
     return {
-      playerCount,
+      counts,
+      topCuts,
       entryFee,
       boosterCost,
-      topCut,
       participationBoosters,
       prizePackMode,
       targetMargin,
@@ -312,20 +398,14 @@
       return;
     }
 
-    if (inputs.playerCount < calculator.MIN_PLAYERS) {
-      $("#players").setAttribute("aria-invalid", "true");
-      showProblem(`Een toernooi heeft minimaal ${calculator.MIN_PLAYERS} spelers nodig.`, "warning");
-      return;
-    }
-
-    const data = calculator.computeWithMargin(
-      inputs.playerCount,
+    const data = calculator.computeDivisions(
+      inputs.counts,
       inputs.entryFee,
       inputs.targetMargin,
       inputs.minMargin,
       inputs.maxMargin,
       {
-        topCut: inputs.topCut,
+        topCuts: inputs.topCuts,
         boosterCost: inputs.boosterCost,
         participationBoosters: inputs.participationBoosters,
         prizePackMode: inputs.prizePackMode,
@@ -333,12 +413,12 @@
     );
 
     renderOutcome(data, inputs);
-    renderWarnings(data, inputs.playerCount);
-    renderTable(data, inputs.playerCount);
+    renderWarnings(data);
+    renderTables(data);
     resultsBody.classList.remove("is-empty", "is-stale");
     hasRendered = true;
 
-    resultsStatus.textContent = `${inputs.playerCount} spelers: winst ${formatEuro(data.profit)}, marge ${formatPercent(data.margin)}, ${data.total_out.boosters} boosters en ${data.total_out.prize_packs} prijspakketten.`;
+    resultsStatus.textContent = `${data.players} spelers in ${plural(data.divisions.length, "divisie", "divisies")}: winst ${formatEuro(data.profit)}, marge ${formatPercent(data.margin)}, ${data.total_out.boosters} boosters en ${data.total_out.prize_packs} prijspakketten.`;
   }
 
   function applyTheme(theme) {
